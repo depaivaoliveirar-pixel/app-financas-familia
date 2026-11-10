@@ -1,0 +1,7 @@
+node_modules/
+amostras/
+*.log
+
+# Contexto de trabalho com dados pessoais/financeiros reais — nunca publicar
+CLAUDE.md
+replica/

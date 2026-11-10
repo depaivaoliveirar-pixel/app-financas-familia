@@ -1,0 +1,9 @@
+{
+  "name": "financas-da-familia",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "App local de finanças da família (leitores BB, XP, Sicoob)",
+  "scripts": { "teste": "node teste.mjs" },
+  "dependencies": { "pdfjs-dist": "^4.10.38" }
+}

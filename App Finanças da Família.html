@@ -1,0 +1,837 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finanças da Família</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --verde:#0F5E57; --verde-escuro:#0B4741;
+    --azul:#1D4ED8; --laranja:#B45309; --laranja-escuro:#92400E;
+    --bg:#F4F6F5; --card:#FFFFFF; --borda:#DDE3E1; --borda2:#EEF1F0;
+    --texto:#1C2321; --texto2:#4A5653; --texto3:#5A6663; --texto4:#33403D;
+    --verde-ok:#15803D; --verde-okbg:#F0FDF4; --verde-oktexto:#166534;
+    --vermelho:#B91C1C; --vermelho-bg:#FEF2F2; --vermelho-texto:#991B1B;
+    --amarelo-bg:#FFF7ED; --amarelo-borda:#F3D9B5;
+    --cinza-borda:#B9C4C1; --cinza-bg:#E6EFEC; --cinza-bg2:#F9FAFA;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,sans-serif;color:var(--texto);background:var(--bg)}
+  a{color:var(--verde)} a:hover{color:var(--verde-escuro)}
+  button{font-family:inherit;cursor:pointer}
+  input,select,textarea{font-family:inherit}
+  .oculto{display:none !important}
+  header.topo{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:16px 32px;background:var(--card);border-bottom:1px solid var(--borda)}
+  .marca{display:flex;align-items:center;gap:12px}
+  .marca .logo{width:40px;height:40px;border-radius:10px;background:var(--verde);display:flex;align-items:center;justify-content:center;flex:none}
+  .marca .nome{font-size:20px;font-weight:700}
+  .marca .perfil{font-size:13px;color:var(--texto3)}
+  nav.menu{display:flex;flex-wrap:wrap;gap:6px}
+  nav.menu button{padding:10px 16px;border-radius:999px;border:none;background:none;font-weight:600;font-size:14px;color:var(--texto);display:flex;align-items:center;gap:8px}
+  nav.menu button.ativo{background:var(--verde);color:#fff}
+  nav.menu button .conta{background:var(--laranja);color:#fff;border-radius:999px;padding:2px 8px;font-size:12px}
+  main.conteudo{max-width:1120px;margin:0 auto;padding:32px 24px}
+  .card{background:var(--card);border:1px solid var(--borda);border-radius:16px;padding:24px}
+  .grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+  h1{margin:0 0 8px;font-size:28px}
+  h2{margin:0 0 16px;font-size:18px}
+  p.sub{margin:0 0 20px;font-size:16px;color:var(--texto2);line-height:1.5}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:12px;border:1px solid var(--cinza-borda);background:#fff;font-size:15px;font-weight:600;color:var(--texto);text-decoration:none}
+  .btn-primario{border:none;background:var(--verde);color:#fff}
+  .btn-casa{border:none;background:var(--laranja);color:#fff}
+  .btn-grande{min-height:52px;font-size:16px;padding:0 24px}
+  .pill{padding:6px 14px;border-radius:999px;background:var(--cinza-bg);font-size:14px;font-weight:600}
+  label.campo{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--texto3)}
+  input[type=text],input[type=number],input[type=password],input[type=date],select,textarea{min-height:48px;border-radius:10px;border:1px solid var(--cinza-borda);padding:0 12px;font-size:16px;color:var(--texto);background:#fff}
+  textarea{min-height:90px;padding:10px 12px}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  th{text-align:left;padding:10px 8px;border-bottom:1px solid var(--borda);color:var(--texto2);font-size:13px}
+  td{padding:10px 8px;border-bottom:1px solid var(--borda2)}
+  .toast{position:fixed;bottom:20px;right:20px;max-width:360px;background:var(--texto);color:#fff;padding:14px 18px;border-radius:12px;font-size:15px;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:50}
+  .toast.erro{background:var(--vermelho-texto)}
+  .barra{height:28px;border-radius:8px;overflow:hidden;display:flex}
+  .zona-arrastar{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:48px 24px;border:3px dashed var(--verde);border-radius:20px;background:#fff;text-align:center;cursor:pointer}
+  .zona-arrastar.sobre{background:var(--cinza-bg)}
+</style>
+</head>
+<body>
+<div id="toasts"></div>
+<div id="app"></div>
+
+<script src="codigo/leitores.js"></script>
+<script src="codigo/motor.js"></script>
+<script type="module">
+import * as pdfjsLib from './codigo/pdf.min.mjs';
+pdfjsLib.GlobalWorkerOptions.workerSrc = './codigo/pdf.worker.min.mjs';
+
+async function pdfLines(bytes, senha) {
+  const doc = await pdfjsLib.getDocument({ data: bytes, password: senha, isEvalSupported: false }).promise;
+  const out = [];
+  for (let p = 1; p <= doc.numPages; p++) {
+    const page = await doc.getPage(p);
+    const tc = await page.getTextContent();
+    const items = tc.items.filter(i => i.str && i.str.trim() !== '').map(i => ({ s: i.str, x: i.transform[4], y: Math.round(i.transform[5] * 2) / 2, w: i.width }));
+    items.sort((a, b) => b.y - a.y || a.x - b.x);
+    const linhas = [];
+    for (const it of items) {
+      const l = linhas.find(l => Math.abs(l.y - it.y) <= 2.5);
+      if (l) l.its.push(it); else linhas.push({ y: it.y, its: [it] });
+    }
+    linhas.sort((a, b) => b.y - a.y);
+    for (const l of linhas) {
+      l.its.sort((a, b) => a.x - b.x);
+      let txt = '', fim = null;
+      for (const it of l.its) {
+        if (fim === null) txt = it.s;
+        else txt += (it.x - fim > 8 ? '\t' : (it.x - fim > 0.5 ? ' ' : '')) + it.s;
+        fim = it.x + it.w;
+      }
+      out.push({ page: p, y: l.y, text: txt.replace(/[  ]+/g, ' ').trim() });
+    }
+  }
+  return out;
+}
+
+const L = window.Leitores, M = window.Motor;
+
+/* ---------------- armazenamento (File System Access API) ---------------- */
+const DB_NOME = 'financas-familia', DB_VERSAO = 1, DB_LOJA = 'config';
+function abrirDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NOME, DB_VERSAO);
+    req.onupgradeneeded = () => req.result.createObjectStore(DB_LOJA);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function guardarValor(chave, valor) {
+  const db = await abrirDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(DB_LOJA, 'readwrite');
+    tx.objectStore(DB_LOJA).put(valor, chave);
+    tx.oncomplete = () => resolve(); tx.onerror = () => reject(tx.error);
+  });
+}
+async function lerValor(chave) {
+  const db = await abrirDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(DB_LOJA, 'readonly');
+    const req = tx.objectStore(DB_LOJA).get(chave);
+    req.onsuccess = () => resolve(req.result); req.onerror = () => reject(req.error);
+  });
+}
+
+const ARQUIVO_DADOS = 'financas-familia-dados.json';
+let pastaHandle = null;
+
+async function escolherPasta() {
+  pastaHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+  await guardarValor('pastaHandle', pastaHandle);
+  return pastaHandle;
+}
+async function recuperarPasta() {
+  const h = await lerValor('pastaHandle');
+  if (!h) return null;
+  try {
+    const perm = await h.queryPermission({ mode: 'readwrite' });
+    if (perm === 'granted') { pastaHandle = h; return h; }
+    return null; // precisa pedir permissão de novo com gesto do usuário
+  } catch (e) { return null; }
+}
+async function pedirPermissaoPasta(h) {
+  const perm = await h.requestPermission({ mode: 'readwrite' });
+  if (perm === 'granted') { pastaHandle = h; return true; }
+  return false;
+}
+async function salvarEstado() {
+  if (!pastaHandle || !estado) return;
+  const fh = await pastaHandle.getFileHandle(ARQUIVO_DADOS, { create: true });
+  const ws = await fh.createWritable();
+  await ws.write(M.serializar(estado));
+  await ws.close();
+}
+async function carregarEstadoDaPasta() {
+  try {
+    const fh = await pastaHandle.getFileHandle(ARQUIVO_DADOS);
+    const file = await fh.getFile();
+    const texto = await file.text();
+    return M.desserializar(texto);
+  } catch (e) { return null; }
+}
+
+/* ---------------- estado global do app ---------------- */
+let estado = null;
+let mesAtual = null;
+let filtroLancamentos = 'Todos';
+let dadosClassificando = {}; // chave -> {tipo, categoria, frequencia} enquanto a pessoa preenche a tela Classificar
+
+function mesFmt(competencia) {
+  if (!competencia) return '';
+  const MESES = 'janeiro fevereiro março abril maio junho julho agosto setembro outubro novembro dezembro'.split(' ');
+  const [a, m] = competencia.split('-').map(Number);
+  return MESES[m - 1] + ' de ' + a;
+}
+function dataFmt(iso) { const [, m, d] = iso.split('-'); return d + '/' + m; }
+function moeda(v) { return 'R$ ' + (v < 0 ? '-' : '') + Math.abs(v).toFixed(2).replace('.', ',').replace(/\d(?=(\d{3})+,)/g, '$&.'); }
+
+function toast(msg, ehErro) {
+  const el = document.createElement('div');
+  el.className = 'toast' + (ehErro ? ' erro' : '');
+  el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), 5000);
+}
+
+/* ---------------- ciclo de vida ---------------- */
+async function iniciar() {
+  const h = await recuperarPasta();
+  if (h) {
+    const e = await carregarEstadoDaPasta();
+    if (e) { estado = e; }
+  }
+  renderizar();
+}
+
+function estadoPronto() { return !!estado; }
+
+/* ---------------- views ---------------- */
+const VIEWS = {};
+let viewAtual = 'inicio';
+
+function irPara(v) { viewAtual = v; renderizar(); }
+
+function layout(conteudoHtml) {
+  const perfilLabel = estado ? (estado.nomePessoa || (estado.perfil === 'priscila' ? 'Priscila' : 'Minha conta')) : '';
+  const qtdNovidades = estado ? M.novidades(estado).length : 0;
+  const abas = [
+    ['inicio', 'Início'], ['classificar', 'Classificar'], ['resumo', 'Resumo'],
+    ['lancarManual', 'Lançar manualmente'], ['ajustes', 'Ajustes'], ['ajuda', 'Ajuda']
+  ];
+  const nav = abas.map(([k, label]) => {
+    const badge = k === 'classificar' && qtdNovidades > 0 ? `<span class="conta">${qtdNovidades}</span>` : '';
+    return `<button data-ir="${k}" class="${viewAtual === k ? 'ativo' : ''}">${label}${badge}</button>`;
+  }).join('');
+  document.getElementById('app').innerHTML = `
+    <header class="topo">
+      <div class="marca">
+        <div class="logo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-6 9 6"/><path d="M5 10v9h14v-9"/><path d="M10 19v-5h4v5"/></svg></div>
+        <div><div class="nome">Finanças da Família</div><div class="perfil">${perfilLabel ? 'Perfil: ' + perfilLabel : ''}</div></div>
+      </div>
+      <nav class="menu" aria-label="Menu principal">${nav}</nav>
+    </header>
+    <main class="conteudo">${conteudoHtml}</main>
+  `;
+  document.querySelectorAll('[data-ir]').forEach(b => b.onclick = () => irPara(b.dataset.ir));
+}
+
+function renderizar() {
+  if (!estadoPronto() && viewAtual !== 'configuracaoInicial') {
+    renderConfiguracaoInicial();
+    return;
+  }
+  (VIEWS[viewAtual] || VIEWS.inicio)();
+}
+
+/* ---------- Configuração inicial (1ª vez) ---------- */
+function renderConfiguracaoInicial() {
+  document.getElementById('app').innerHTML = `
+    <main class="conteudo" style="max-width:640px">
+      <div class="card">
+        <h1>Bem-vindo(a) ao Finanças da Família</h1>
+        <p class="sub">Antes de começar, escolha a pasta onde o app vai guardar seus dados (só neste computador, sem internet) e conte um pouco sobre você.</p>
+        ${location.protocol === 'file:' ? `<div style="background:var(--vermelho-bg);border-radius:10px;padding:14px 16px;font-size:14px;color:var(--vermelho-texto);margin-bottom:16px;line-height:1.5">
+          <strong>Abra este arquivo de um jeito diferente:</strong> escolher a pasta não funciona abrindo o arquivo direto (clique duplo). Siga as instruções que vieram junto com o app para abrir certo (ou fale com o Ricardo).
+        </div>` : ''}
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <label class="campo">Seu nome
+            <input type="text" id="cfgNome" placeholder="Ex.: Ricardo">
+          </label>
+          <label class="campo">Perfil de categorias
+            <select id="cfgPerfil">
+              <option value="padrao">Padrão (categorias curtas)</option>
+              <option value="priscila">Priscila (categorias da planilha da família)</option>
+            </select>
+          </label>
+          <label class="campo">Seu nome completo, para identificar transferências entre suas próprias contas (opcional)
+            <input type="text" id="cfgTitular" placeholder="Ex.: Ricardo de Paiva Oliveira">
+          </label>
+          <button class="btn btn-primario btn-grande" id="cfgContinuar">Escolher pasta e começar</button>
+          <p style="margin:0;font-size:13px;color:var(--texto3)">Precisa ser no Chrome ou Edge, no computador — não funciona no celular.</p>
+          <button class="btn" id="cfgSemPasta" style="font-size:13px;min-height:36px;align-self:flex-start">Continuar sem escolher pasta (teste — não salva nada)</button>
+        </div>
+      </div>
+    </main>
+  `;
+  document.getElementById('cfgContinuar').onclick = async () => {
+    const nome = document.getElementById('cfgNome').value.trim();
+    const perfil = document.getElementById('cfgPerfil').value;
+    const titular = document.getElementById('cfgTitular').value.trim();
+    if (!nome) { toast('Informe seu nome.', true); return; }
+    if (!window.showDirectoryPicker) { toast('Seu navegador não tem suporte a isso. Use Chrome ou Edge no computador.', true); return; }
+    try {
+      await escolherPasta();
+      let e = await carregarEstadoDaPasta();
+      if (!e) {
+        e = M.estadoNovo(perfil, titular ? [titular] : []);
+      }
+      if (!e.nomePessoa) M.definirNomePessoa(e, nome);
+      estado = e;
+      await salvarEstado();
+      viewAtual = 'inicio';
+      renderizar();
+      toast('Tudo pronto! Seus dados ficam na pasta que você escolheu.');
+    } catch (err) {
+      if (err && err.name === 'AbortError') return;
+      toast('Não consegui acessar a pasta: ' + err.message, true);
+    }
+  };
+  document.getElementById('cfgSemPasta').onclick = () => {
+    const nome = document.getElementById('cfgNome').value.trim() || 'Teste';
+    const perfil = document.getElementById('cfgPerfil').value;
+    const titular = document.getElementById('cfgTitular').value.trim();
+    estado = M.estadoNovo(perfil, titular ? [titular] : []);
+    M.definirNomePessoa(estado, nome);
+    viewAtual = 'inicio';
+    renderizar();
+    toast('Modo de teste: nada será salvo ao recarregar a página.');
+  };
+}
+
+/* ---------- Início ---------- */
+VIEWS.inicio = function () {
+  const importacoes = estado.importacoes.slice(-5).reverse();
+  const novidades = M.novidades(estado);
+  layout(`
+    <div class="grade" style="grid-template-columns:2fr 1fr">
+      <section style="min-width:0">
+        <h1 style="font-size:30px">Traga os extratos do mês</h1>
+        <p class="sub">Arraste os arquivos que você baixou do banco. O app descobre sozinho de qual banco é cada um.</p>
+        <label class="zona-arrastar" id="zonaArrastar">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#0F5E57" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+          <span style="font-size:22px;font-weight:700">Arraste aqui seus extratos e faturas</span>
+          <span style="font-size:16px;color:var(--texto2)">ou clique para escolher os arquivos no computador</span>
+          <input type="file" multiple id="inputArquivos" style="font-size:15px">
+        </label>
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:20px">
+          <span style="font-size:15px;color:var(--texto2)">Bancos aceitos:</span>
+          <span class="pill">Banco do Brasil</span><span class="pill">XP</span><span class="pill">Sicoob</span>
+          <span style="font-size:14px;color:var(--texto2)">Formatos: OFX, CSV, PDF</span>
+        </div>
+        <button type="button" class="btn" style="margin-top:24px" data-ir="guia">Onde baixo meu extrato?</button>
+        <div id="statusImportacao" style="margin-top:20px"></div>
+      </section>
+      <aside style="display:flex;flex-direction:column;gap:20px;min-width:0">
+        <div class="card">
+          <h2>Últimas importações</h2>
+          ${importacoes.length ? `<ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px;font-size:15px">
+            ${importacoes.map(i => `<li style="display:flex;justify-content:space-between;gap:12px"><span>${i.conta}<br><span style="color:var(--texto3);font-size:13px">${i.arquivo}</span></span><span style="color:var(--verde-ok);font-weight:600">OK</span></li>`).join('')}
+          </ul>` : `<p style="margin:0;font-size:15px;color:var(--texto2)">Nenhuma importação ainda.</p>`}
+        </div>
+        ${novidades.length ? `<div class="card" style="background:var(--amarelo-bg);border-color:var(--amarelo-borda)">
+          <h2>${novidades.length} novidade${novidades.length > 1 ? 's' : ''} esperando você</h2>
+          <p class="sub" style="margin-bottom:16px">São lugares que o app ainda não conhece. Depois de classificar, ele lembra sozinho.</p>
+          <button type="button" class="btn btn-casa" style="width:100%" data-ir="classificar">Classificar agora</button>
+        </div>` : ''}
+        <p style="margin:0;font-size:13px;color:var(--texto3);line-height:1.5">Seus dados ficam só neste computador, na pasta que você escolheu.</p>
+      </aside>
+    </div>
+  `);
+  const zona = document.getElementById('zonaArrastar');
+  const inputArq = document.getElementById('inputArquivos');
+  inputArq.onchange = () => processarArquivos(inputArq.files);
+  zona.addEventListener('dragover', e => { e.preventDefault(); zona.classList.add('sobre'); });
+  zona.addEventListener('dragleave', () => zona.classList.remove('sobre'));
+  zona.addEventListener('drop', e => {
+    e.preventDefault(); zona.classList.remove('sobre');
+    if (e.dataTransfer.files.length) processarArquivos(e.dataTransfer.files);
+  });
+};
+
+async function processarArquivos(fileList) {
+  const status = document.getElementById('statusImportacao');
+  const arquivos = Array.from(fileList);
+  for (const arquivo of arquivos) {
+    status.innerHTML += `<p style="margin:4px 0;font-size:14px;color:var(--texto2)">Lendo ${arquivo.nome || arquivo.name}…</p>`;
+    const bytes = new Uint8Array(await arquivo.arrayBuffer());
+    let senha = null, tentativas = 0, resultado = null;
+    while (tentativas < 3) {
+      try {
+        resultado = await L.lerArquivo(arquivo.name, bytes, { senha, nomesTitular: estado.nomesTitular, linhasPDF: (b, pw) => pdfLines(b.slice(), pw) });
+        break;
+      } catch (e) {
+        if (e.precisaSenha) {
+          senha = prompt('Este arquivo "' + arquivo.name + '" tem senha. Digite a senha (não guardamos):');
+          if (senha == null) { status.innerHTML += mensagemStatus(arquivo.name, 'Importação cancelada (sem senha).', true); toast(arquivo.name + ': importação cancelada (sem senha).', true); break; }
+          tentativas++;
+          continue;
+        }
+        const msgErro = e.amigavel ? e.message : 'Erro inesperado ao ler o arquivo.';
+        status.innerHTML += mensagemStatus(arquivo.name, msgErro, true);
+        toast(arquivo.name + ': ' + msgErro, true);
+        resultado = null;
+        break;
+      }
+    }
+    if (!resultado) continue;
+    const r = M.importar(estado, resultado);
+    let msg = `${resultado.banco} ${resultado.tipo} — ${r.novos} lançamento(s) novo(s)` + (r.duplicados ? `, ${r.duplicados} já existiam` : '') + '.';
+    status.innerHTML += mensagemStatus(arquivo.name, msg, false);
+    if (r.aviso) { status.innerHTML += mensagemStatus(arquivo.name, r.aviso, true, true); toast(arquivo.name + ': ' + r.aviso, true); }
+  }
+  await salvarEstado();
+  irPara('inicio');
+}
+function mensagemStatus(arquivo, msg, ehErro, ehAviso) {
+  const cor = ehErro ? (ehAviso ? 'var(--laranja-escuro)' : 'var(--vermelho-texto)') : 'var(--verde-oktexto)';
+  return `<p style="margin:4px 0;font-size:14px;color:${cor}"><strong>${arquivo}:</strong> ${msg}</p>`;
+}
+
+/* ---------- Classificar (Novidades) ---------- */
+VIEWS.classificar = function () {
+  const grupos = M.novidades(estado);
+  const pendentes = M.conciliacoesPendentesDetalhadas(estado);
+  if (!grupos.length && !pendentes.length) {
+    layout(`<div class="card"><h1>Tudo classificado!</h1><p class="sub">Não há nada novo para classificar agora.</p><button class="btn btn-primario" data-ir="inicio">Voltar ao início</button></div>`);
+    return;
+  }
+  layout(`
+    <div style="display:flex;flex-direction:column;gap:20px">
+      ${pendentes.length ? `<div>
+        <h1 style="font-size:24px">Confira: pode ser um destes lançamentos que você já cadastrou</h1>
+        <p class="sub">Dois ou mais lançamentos manuais batem com o que chegou no extrato. Escolha qual é (ou diga que não é nenhum).</p>
+        ${pendentes.map((p, i) => `
+          <article class="card" style="margin-bottom:12px">
+            <div style="font-weight:700">${p.importado.descricao} — ${moeda(-p.importado.valor)} em ${dataFmt(p.importado.data)}</div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+              ${p.candidatos.map(c => `<label style="display:flex;align-items:center;gap:8px;font-size:15px"><input type="radio" name="pend${i}" value="${c.id}"> ${c.descricao} — ${moeda(-c.valor)} em ${dataFmt(c.data)}</label>`).join('')}
+            </div>
+            <div style="display:flex;gap:10px;margin-top:14px">
+              <button class="btn btn-primario" data-confirmar-pendente="${p.importado.id}">Confirmar escolha</button>
+              <button class="btn" data-rejeitar-pendente="${p.importado.id}">Não é nenhum destes</button>
+            </div>
+          </article>`).join('')}
+      </div>` : ''}
+      ${grupos.length ? `<div>
+        <h1 style="font-size:30px">${grupos.length} lugar${grupos.length > 1 ? 'es' : ''} nov${grupos.length > 1 ? 'os' : 'o'}</h1>
+        <p class="sub">Diga uma vez se é gasto <strong>Pessoal</strong> ou da <strong>Casa</strong> e escolha a categoria. Nas próximas vezes o app faz isso sozinho.</p>
+        ${grupos.map((g, i) => renderGrupoClassificar(g, i)).join('')}
+        <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-end;padding-top:8px">
+          <button class="btn" data-ir="inicio">Deixar para depois</button>
+          <button class="btn btn-primario btn-grande" id="salvarClassificacoes">Salvar e lembrar</button>
+        </div>
+      </div>` : ''}
+    </div>
+  `);
+  document.querySelectorAll('[data-confirmar-pendente]').forEach(b => b.onclick = async () => {
+    const id = b.dataset.confirmarPendente;
+    const sel = document.querySelector(`input[name="pend${pendentes.findIndex(p => p.importado.id === id)}"]:checked`);
+    if (!sel) { toast('Escolha uma opção.', true); return; }
+    M.confirmarConciliacao(estado, id, sel.value);
+    await salvarEstado();
+    irPara('classificar');
+  });
+  document.querySelectorAll('[data-rejeitar-pendente]').forEach(b => b.onclick = async () => {
+    M.rejeitarConciliacao(estado, b.dataset.rejeitarPendente);
+    await salvarEstado();
+    irPara('classificar');
+  });
+  document.getElementById('salvarClassificacoes')?.addEventListener('click', async () => {
+    let faltou = false;
+    for (let i = 0; i < grupos.length; i++) {
+      const g = grupos[i];
+      const tipoBtn = document.querySelector(`[data-grupo="${i}"].tipo-ativo`);
+      if (!tipoBtn) { faltou = true; continue; }
+      const tipo = tipoBtn.dataset.tipo;
+      const categoria = document.getElementById('cat' + i).value;
+      const freqEl = document.getElementById('freq' + i);
+      const frequencia = freqEl ? freqEl.value : undefined;
+      try { M.classificar(estado, g.chave, tipo, categoria, frequencia); }
+      catch (e) { toast(g.descricaoExemplo + ': ' + e.message, true); faltou = true; }
+    }
+    if (faltou) { toast('Alguns itens ficaram sem classificar. Classifique-os ou deixe para depois.', true); }
+    await salvarEstado();
+    irPara(faltou ? 'classificar' : 'inicio');
+  });
+  grupos.forEach((g, i) => {
+    document.querySelectorAll(`[data-grupo="${i}"]`).forEach(b => b.onclick = () => {
+      document.querySelectorAll(`[data-grupo="${i}"]`).forEach(x => x.classList.remove('tipo-ativo'));
+      b.classList.add('tipo-ativo');
+      atualizarEstiloTipo(i);
+      const freqWrap = document.getElementById('freqWrap' + i);
+      if (freqWrap) freqWrap.classList.toggle('oculto', b.dataset.tipo !== 'Casa');
+    });
+  });
+};
+function renderGrupoClassificar(g, i) {
+  return `
+    <article class="card" style="display:flex;flex-wrap:wrap;align-items:center;gap:20px;margin-bottom:12px">
+      <div style="flex:1 1 260px;min-width:0">
+        <div style="font-size:19px;font-weight:700">${g.chave}</div>
+        <div style="font-size:14px;color:var(--texto3);margin-top:4px">${g.quantidade} lançamento${g.quantidade > 1 ? 's' : ''} · ${moeda(g.total)} · ${g.origens.join(', ')}</div>
+      </div>
+      <div role="group" aria-label="Pessoal ou Casa" style="display:flex;gap:8px">
+        <button type="button" data-grupo="${i}" data-tipo="Pessoal" style="min-height:48px;padding:0 22px;border-radius:12px;border:2px solid #1D4ED8;background:#fff;color:#1D4ED8;font-weight:600">Pessoal</button>
+        <button type="button" data-grupo="${i}" data-tipo="Casa" style="min-height:48px;padding:0 22px;border-radius:12px;border:2px solid #B45309;background:#fff;color:#B45309;font-weight:600">Casa</button>
+      </div>
+      <label class="campo">Categoria
+        <select id="cat${i}" style="min-width:200px">${estado.categorias.map(c => `<option>${c}</option>`).join('')}</select>
+      </label>
+      <label class="campo oculto" id="freqWrap${i}">Frequência
+        <select id="freq${i}">${M.FREQUENCIAS.map(f => `<option>${f}</option>`).join('')}</select>
+      </label>
+    </article>
+  `;
+}
+function atualizarEstiloTipo(i) {
+  document.querySelectorAll(`[data-grupo="${i}"]`).forEach(b => {
+    const ativo = b.classList.contains('tipo-ativo');
+    const cor = b.dataset.tipo === 'Casa' ? '#B45309' : '#1D4ED8';
+    b.style.background = ativo ? cor : '#fff';
+    b.style.color = ativo ? '#fff' : cor;
+  });
+}
+
+/* ---------- Resumo do mês ---------- */
+VIEWS.resumo = function () {
+  const meses = M.mesesComLancamentos(estado);
+  if (!mesAtual || !meses.includes(mesAtual)) mesAtual = meses[0] || new Date().toISOString().slice(0, 7);
+  const idx = meses.indexOf(mesAtual);
+  const r = M.resumoMes(estado, mesAtual);
+  const orcamento = M.orcamentoMes(estado, mesAtual);
+  const lista = filtroLancamentos === 'Todos' ? r.lancamentos : r.lancamentos.filter(t => t.tipo === filtroLancamentos);
+  const totalCategoria = Object.values(r.porCategoria).reduce((s, v) => s + v, 0) || 1;
+  layout(`
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button type="button" aria-label="Mês anterior" id="mesAnterior" class="btn" style="width:44px;height:44px;padding:0" ${idx >= meses.length - 1 ? 'disabled' : ''}>‹</button>
+          <h1>${mesFmt(mesAtual)}</h1>
+          <button type="button" aria-label="Próximo mês" id="mesProximo" class="btn" style="width:44px;height:44px;padding:0" ${idx <= 0 ? 'disabled' : ''}>›</button>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:12px">
+          <button class="btn" id="btnExportarExcel">Exportar para Excel</button>
+          <button class="btn btn-casa" data-ir="enviarCasa">Enviar Casa para a planilha da família</button>
+        </div>
+      </div>
+      <div class="grade">
+        <div class="card"><div style="font-size:14px;color:var(--texto2)">Entrou</div><div style="font-size:28px;font-weight:700;color:var(--verde-ok);margin-top:6px">${moeda(r.entrou)}</div></div>
+        <div class="card"><div style="font-size:14px;color:var(--texto2)">Saiu</div><div style="font-size:28px;font-weight:700;color:var(--vermelho);margin-top:6px">${moeda(r.saiu)}</div></div>
+        <div class="card"><div style="font-size:14px;color:var(--texto2)">Sobrou</div><div style="font-size:28px;font-weight:700;margin-top:6px">${moeda(r.sobrou)}</div></div>
+      </div>
+      <div class="grade" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr))">
+        <section class="card">
+          <h2>Pessoal × Casa</h2>
+          <div class="barra" role="img" aria-label="Pessoal e Casa">
+            <div style="width:${pct(r.pessoalXcasa.Pessoal, r.saiu)}%;background:#1D4ED8"></div>
+            <div style="width:${pct(r.pessoalXcasa.Casa, r.saiu)}%;background:#B45309"></div>
+            <div style="width:${pct(r.pessoalXcasa['Sem classificar'], r.saiu)}%;background:#B9C4C1"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;gap:12px;margin-top:14px;font-size:15px;flex-wrap:wrap">
+            <span><strong style="color:#1D4ED8">Pessoal</strong> ${moeda(r.pessoalXcasa.Pessoal || 0)}</span>
+            <span><strong style="color:#92400E">Casa</strong> ${moeda(r.pessoalXcasa.Casa || 0)}</span>
+            ${r.pessoalXcasa['Sem classificar'] ? `<span><strong>Sem classificar</strong> ${moeda(r.pessoalXcasa['Sem classificar'])}</span>` : ''}
+          </div>
+        </section>
+        <section class="card">
+          <h2>Por categoria</h2>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:14px">
+            ${Object.entries(r.porCategoria).sort((a, b) => b[1] - a[1]).map(([cat, v]) => `
+              <div style="display:grid;grid-template-columns:130px 1fr 90px;align-items:center;gap:10px">
+                <span>${cat}${cat === 'Tarifas e juros' ? ' ⚠️' : ''}</span>
+                <div style="height:12px;border-radius:6px;background:${cat === 'Tarifas e juros' ? '#B91C1C' : '#0F5E57'};width:${Math.round(v / totalCategoria * 100)}%"></div>
+                <span style="text-align:right">${moeda(v)}</span>
+              </div>`).join('') || '<p style="margin:0;color:var(--texto2)">Sem gastos no mês.</p>'}
+          </div>
+        </section>
+        ${orcamento.categorias.length ? `<section class="card">
+          <h2>Ritmo do mês (${orcamento.percentualMesPassado}% do mês já passou)</h2>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            ${orcamento.categorias.map(c => {
+              const cor = c.ritmo === 'estourou' ? '#B91C1C' : (c.ritmo === 'atencao' ? '#B45309' : '#15803D');
+              const texto = c.ritmo === 'estourou' ? 'estourou o limite' : (c.ritmo === 'atencao' ? 'gastando rápido' : 'dentro do esperado');
+              return `<div>
+                <div style="display:flex;justify-content:space-between;font-size:14px"><strong>${c.categoria}</strong><span style="color:${cor};font-weight:600">${texto}</span></div>
+                <div style="height:10px;border-radius:6px;background:var(--borda2);margin-top:6px;overflow:hidden"><div style="height:100%;width:${Math.min(100, c.percentualGasto)}%;background:${cor}"></div></div>
+                <div style="font-size:13px;color:var(--texto3);margin-top:4px">${moeda(c.gasto)} de ${moeda(c.limite)} (${c.percentualGasto}%)</div>
+              </div>`;
+            }).join('')}
+          </div>
+        </section>` : ''}
+      </div>
+      <section class="card">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px">
+          <h2 style="margin:0">Lançamentos</h2>
+          <div role="group" aria-label="Filtro" style="display:flex;gap:8px">
+            ${['Todos', 'Pessoal', 'Casa'].map(f => `<button type="button" data-filtro="${f}" class="btn" style="min-height:40px;border-radius:999px;${filtroLancamentos === f ? 'background:#1C2321;color:#fff;border:none' : ''}">${f}</button>`).join('')}
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="min-width:640px">
+            <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th style="text-align:right">Valor</th></tr></thead>
+            <tbody>
+              ${lista.map(t => `<tr><td>${dataFmt(t.data)}</td><td>${t.descricao}</td><td>${t.categoria || '—'}</td><td style="color:${t.tipo === 'Casa' ? '#92400E' : '#1D4ED8'};font-weight:600">${t.tipo || 'Sem classificar'}</td><td style="text-align:right">${moeda(t.valor)}</td></tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--texto2)">Nada aqui.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+        <p style="margin:12px 0 0;font-size:13px;color:var(--texto3)">Fora da conta: transferências entre suas contas, aplicação automática e pagamento de fatura.</p>
+      </section>
+    </div>
+  `);
+  document.getElementById('mesAnterior').onclick = () => { if (idx < meses.length - 1) { mesAtual = meses[idx + 1]; irPara('resumo'); } };
+  document.getElementById('mesProximo').onclick = () => { if (idx > 0) { mesAtual = meses[idx - 1]; irPara('resumo'); } };
+  document.querySelectorAll('[data-filtro]').forEach(b => b.onclick = () => { filtroLancamentos = b.dataset.filtro; irPara('resumo'); });
+  document.getElementById('btnExportarExcel').onclick = () => baixarArquivo(M.exportarResumoCSV(estado, mesAtual), `Resumo_${mesAtual}.csv`);
+};
+function pct(v, total) { return total ? Math.round((v || 0) / total * 100) : 0; }
+function baixarArquivo(texto, nome) {
+  const blob = new Blob(['﻿' + texto], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = nome; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+/* ---------- Onde baixo meu extrato? ---------- */
+VIEWS.guia = function () {
+  layout(`
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <button class="btn" data-ir="inicio">‹ Voltar</button>
+      <h1>Onde baixo meu extrato?</h1>
+      <p class="sub">Todo mês, no app ou no site do seu banco, use a opção <strong>exportar extrato</strong> da <strong>conta corrente</strong> e baixe a <strong>fatura do cartão</strong> do mês anterior. Abaixo, o melhor formato para cada banco.</p>
+      <div class="grade">
+        <section class="card">
+          <h2>Banco do Brasil</h2>
+          <p><strong>Conta corrente:</strong> OFX (melhor), CSV ou PDF.</p>
+          <p><strong>Cartão Ourocard:</strong> fatura fechada em PDF.</p>
+        </section>
+        <section class="card">
+          <h2>XP</h2>
+          <p><strong>Conta digital:</strong> OFX (melhor), CSV ou PDF.</p>
+          <p><strong>Cartão XP:</strong> fatura em CSV (melhor) ou PDF (pede senha — o app pede também, e não guarda).</p>
+        </section>
+        <section class="card">
+          <h2>Sicoob</h2>
+          <p><strong>Conta corrente:</strong> PDF.</p>
+          <div style="background:var(--vermelho-bg);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--vermelho-texto)">Não use a opção de imagem (PNG): o app não consegue ler foto.</div>
+        </section>
+      </div>
+      <section class="card" style="background:var(--cinza-bg)">
+        <h2>Importou o mesmo arquivo duas vezes?</h2>
+        <p>Sem problema. O app reconhece o que já existe e não repete.</p>
+      </section>
+    </div>
+  `);
+};
+
+/* ---------- Enviar Casa ---------- */
+VIEWS.enviarCasa = function () {
+  const meses = M.mesesComLancamentos(estado);
+  if (!mesAtual) mesAtual = meses[0];
+  const itens = M.itensCasa(estado, mesAtual);
+  const total = itens.reduce((s, t) => s - t.valor, 0);
+  const jaEnviados = itens.filter(t => t.enviadoCasaEm).length;
+  layout(`
+    <div style="display:flex;flex-direction:column;gap:20px;max-width:880px;margin:0 auto">
+      <button class="btn" data-ir="resumo">‹ Voltar ao resumo</button>
+      <h1>Enviar Casa para a planilha da família — ${mesFmt(mesAtual)}</h1>
+      <section class="card">
+        <p class="sub">Só vão os gastos marcados como <strong style="color:#92400E">Casa</strong>. Os gastos pessoais continuam só neste computador.</p>
+        <div class="grade">
+          <div style="background:var(--amarelo-bg);border-radius:12px;padding:16px"><div style="font-size:13px;color:var(--texto2)">Lançamentos da Casa</div><div style="font-size:24px;font-weight:700">${itens.length}</div></div>
+          <div style="background:var(--amarelo-bg);border-radius:12px;padding:16px"><div style="font-size:13px;color:var(--texto2)">Total da Casa</div><div style="font-size:24px;font-weight:700">${moeda(total)}</div></div>
+          <div style="background:var(--bg);border-radius:12px;padding:16px"><div style="font-size:13px;color:var(--texto2)">Já enviados antes</div><div style="font-size:24px;font-weight:700">${jaEnviados}</div></div>
+        </div>
+      </section>
+      ${!estado.nomePessoa ? `<section class="card" style="background:var(--amarelo-bg);border-color:var(--amarelo-borda)"><p class="sub" style="margin:0">Cadastre seu nome em Ajustes antes de enviar.</p></section>` : `
+      <section class="card" style="display:flex;flex-direction:column;gap:16px">
+        <h2>Enviar</h2>
+        <p style="margin:0;font-size:15px;color:var(--texto2)">O arquivo é salvo na pasta de dados do app. Depois, mova/copie para a pasta compartilhada do Google Drive da família.</p>
+        <button type="button" class="btn btn-casa btn-grande" id="btnEnviarCasa" style="align-self:flex-start">Gerar e baixar arquivo</button>
+      </section>`}
+      <p style="margin:0;font-size:13px;color:var(--texto3)">A planilha da família lê o arquivo e lança na aba Lançamentos sem repetir o que já entrou.</p>
+    </div>
+  `);
+  document.getElementById('btnEnviarCasa')?.addEventListener('click', async () => {
+    try {
+      const { texto, ids } = M.exportarCasaCSV(estado, mesAtual);
+      const nome = `Casa_${estado.nomePessoa.replace(/\s+/g, '')}_${mesAtual}_${Date.now()}.csv`;
+      baixarArquivo(texto, nome);
+      M.marcarCasaEnviada(estado, ids);
+      await salvarEstado();
+      toast('Arquivo gerado! Agora mova/copie para a pasta compartilhada do Google Drive.');
+      irPara('enviarCasa');
+    } catch (e) { toast(e.message, true); }
+  });
+};
+
+/* ---------- Lançar manualmente ---------- */
+VIEWS.lancarManual = function () {
+  const pendentes = M.pendentesManuais(estado);
+  layout(`
+    <div style="display:flex;flex-direction:column;gap:20px;max-width:720px;margin:0 auto">
+      <h1>Lançar manualmente</h1>
+      <p class="sub">Para despesas que você já sabe classificar (ex.: "esse jantar foi Casa"). Quando o extrato chegar, o app confere sozinho e não conta em dobro.</p>
+      <section class="card" style="display:flex;flex-direction:column;gap:16px">
+        <label class="campo">Descrição
+          <input type="text" id="lmDescricao" placeholder="Ex.: Jantar aniversário">
+        </label>
+        <div class="grade" style="grid-template-columns:1fr 1fr">
+          <label class="campo">Valor (R$, só o número)
+            <input type="number" min="0" step="0.01" id="lmValor" placeholder="150,00">
+          </label>
+          <label class="campo">Data da despesa
+            <input type="date" id="lmData" value="${new Date().toISOString().slice(0, 10)}">
+          </label>
+        </div>
+        <div role="group" aria-label="Pessoal ou Casa" style="display:flex;gap:8px">
+          <button type="button" id="lmTipoPessoal" data-tipo="Pessoal" style="min-height:48px;padding:0 22px;border-radius:12px;border:2px solid #1D4ED8;background:#fff;color:#1D4ED8;font-weight:600">Pessoal</button>
+          <button type="button" id="lmTipoCasa" data-tipo="Casa" style="min-height:48px;padding:0 22px;border-radius:12px;border:2px solid #B45309;background:#fff;color:#B45309;font-weight:600">Casa</button>
+        </div>
+        <div class="grade" style="grid-template-columns:1fr 1fr">
+          <label class="campo">Categoria
+            <select id="lmCategoria">${estado.categorias.map(c => `<option>${c}</option>`).join('')}</select>
+          </label>
+          <label class="campo oculto" id="lmFreqWrap">Frequência
+            <select id="lmFrequencia">${M.FREQUENCIAS.map(f => `<option>${f}</option>`).join('')}</select>
+          </label>
+        </div>
+        <div class="grade" style="grid-template-columns:1fr 1fr 1fr">
+          <label class="campo">Banco
+            <select id="lmBanco"><option>BB</option><option>XP</option><option>Sicoob</option></select>
+          </label>
+          <label class="campo">Conta ou cartão?
+            <select id="lmOrigem"><option value="conta">Conta</option><option value="cartao">Cartão</option></select>
+          </label>
+          <label class="campo oculto" id="lmCompetenciaWrap">Em qual fatura (mês)?
+            <input type="month" id="lmCompetencia" value="${new Date().toISOString().slice(0, 7)}">
+          </label>
+        </div>
+        <button class="btn btn-primario btn-grande" id="lmSalvar" style="align-self:flex-start">Lançar despesa</button>
+      </section>
+      ${pendentes.length ? `<section class="card">
+        <h2>Ainda não confirmados pelo extrato (${pendentes.length})</h2>
+        <table><thead><tr><th>Data</th><th>Descrição</th><th style="text-align:right">Valor</th></tr></thead>
+        <tbody>${pendentes.map(t => `<tr><td>${dataFmt(t.data)}</td><td>${t.descricao}</td><td style="text-align:right">${moeda(t.valor)}</td></tr>`).join('')}</tbody></table>
+      </section>` : ''}
+    </div>
+  `);
+  let tipoEscolhido = null;
+  const btnPessoal = document.getElementById('lmTipoPessoal'), btnCasa = document.getElementById('lmTipoCasa');
+  const marcarTipo = t => {
+    tipoEscolhido = t;
+    btnPessoal.style.background = t === 'Pessoal' ? '#1D4ED8' : '#fff'; btnPessoal.style.color = t === 'Pessoal' ? '#fff' : '#1D4ED8';
+    btnCasa.style.background = t === 'Casa' ? '#B45309' : '#fff'; btnCasa.style.color = t === 'Casa' ? '#fff' : '#B45309';
+    document.getElementById('lmFreqWrap').classList.toggle('oculto', t !== 'Casa');
+  };
+  btnPessoal.onclick = () => marcarTipo('Pessoal');
+  btnCasa.onclick = () => marcarTipo('Casa');
+  const origemSel = document.getElementById('lmOrigem');
+  const atualizarCompetencia = () => document.getElementById('lmCompetenciaWrap').classList.toggle('oculto', origemSel.value !== 'cartao');
+  origemSel.onchange = atualizarCompetencia;
+  atualizarCompetencia();
+  document.getElementById('lmSalvar').onclick = async () => {
+    try {
+      const descricao = document.getElementById('lmDescricao').value.trim();
+      const valor = Number(document.getElementById('lmValor').value);
+      if (!descricao) throw new Error('Informe a descrição.');
+      if (!valor || valor <= 0) throw new Error('Informe o valor.');
+      if (!tipoEscolhido) throw new Error('Escolha Pessoal ou Casa.');
+      const origem = origemSel.value;
+      const banco = document.getElementById('lmBanco').value;
+      const dados = {
+        data: document.getElementById('lmData').value, descricao, valor: -valor,
+        tipo: tipoEscolhido, categoria: document.getElementById('lmCategoria').value,
+        frequencia: tipoEscolhido === 'Casa' ? document.getElementById('lmFrequencia').value : undefined,
+        banco, origem, conta: banco + (origem === 'cartao' ? ' cartão' : ' conta'),
+        competencia: origem === 'cartao' ? document.getElementById('lmCompetencia').value : undefined
+      };
+      M.lancarManual(estado, dados);
+      await salvarEstado();
+      toast('Despesa lançada!');
+      irPara('lancarManual');
+    } catch (e) { toast(e.message, true); }
+  };
+};
+
+/* ---------- Ajustes ---------- */
+VIEWS.ajustes = function () {
+  layout(`
+    <div style="display:flex;flex-direction:column;gap:20px;max-width:720px;margin:0 auto">
+      <h1>Ajustes</h1>
+      <section class="card" style="display:flex;flex-direction:column;gap:16px">
+        <h2>Seus dados</h2>
+        <label class="campo">Seu nome (usado ao enviar itens Casa como exceção)
+          <input type="text" id="ajNome" value="${estado.nomePessoa || ''}">
+        </label>
+        <button class="btn btn-primario" id="ajSalvarNome" style="align-self:flex-start">Salvar nome</button>
+      </section>
+      <section class="card" style="display:flex;flex-direction:column;gap:16px">
+        <h2>Limite mensal por categoria <span style="font-weight:400;color:var(--texto3);font-size:14px">(opcional — deixe vazio pra não controlar)</span></h2>
+        ${estado.categorias.map(c => `
+          <label class="campo" style="flex-direction:row;align-items:center;gap:10px">
+            <span style="flex:1">${c}</span>
+            <input type="number" min="0" step="1" data-limite="${c}" value="${estado.limites[c] || ''}" style="width:140px" placeholder="R$ por mês">
+          </label>`).join('')}
+        <button class="btn btn-primario" id="ajSalvarLimites" style="align-self:flex-start">Salvar limites</button>
+      </section>
+      <section class="card" style="display:flex;flex-direction:column;gap:12px">
+        <h2>Pasta dos dados</h2>
+        <p style="margin:0;font-size:14px;color:var(--texto2)">Pasta: ${pastaHandle ? pastaHandle.name : '—'}</p>
+        <button class="btn" id="ajTrocarPasta" style="align-self:flex-start">Trocar pasta</button>
+      </section>
+    </div>
+  `);
+  document.getElementById('ajSalvarNome').onclick = async () => {
+    try { M.definirNomePessoa(estado, document.getElementById('ajNome').value); await salvarEstado(); toast('Nome salvo.'); }
+    catch (e) { toast(e.message, true); }
+  };
+  document.getElementById('ajSalvarLimites').onclick = async () => {
+    document.querySelectorAll('[data-limite]').forEach(input => {
+      const v = input.value ? Number(input.value) : 0;
+      M.definirLimiteCategoria(estado, input.dataset.limite, v);
+    });
+    await salvarEstado();
+    toast('Limites salvos.');
+  };
+  document.getElementById('ajTrocarPasta').onclick = async () => {
+    try { await escolherPasta(); await salvarEstado(); toast('Pasta atualizada.'); irPara('ajustes'); }
+    catch (e) { if (e.name !== 'AbortError') toast(e.message, true); }
+  };
+};
+
+/* ---------- Ajuda ---------- */
+VIEWS.ajuda = function () {
+  layout(`
+    <div style="display:flex;flex-direction:column;gap:20px;max-width:720px;margin:0 auto">
+      <h1>Ajuda</h1>
+      <section class="card">
+        <h2>Como usar</h2>
+        <ol style="margin:0;padding-left:22px;font-size:15px;color:var(--texto4);line-height:1.8">
+          <li>Na tela Início, arraste os extratos e faturas do mês.</li>
+          <li>Em Classificar, diga Pessoal ou Casa + categoria a cada lugar novo (uma vez só).</li>
+          <li>Em Resumo, acompanhe o mês e exporte para Excel ou envie a Casa para a planilha da família.</li>
+          <li>Em Ajustes, você define limites por categoria (opcional) e troca a pasta dos dados.</li>
+        </ol>
+      </section>
+      <section class="card" style="display:flex;flex-direction:column;gap:14px">
+        <h2>Sugerir uma melhoria</h2>
+        <p style="margin:0;font-size:15px;color:var(--texto2)">Sem compromisso de implementar — é só pra eu juntar ideias da família.</p>
+        <textarea id="sugestaoTexto" placeholder="Escreva sua sugestão aqui..."></textarea>
+        <button class="btn btn-primario" id="btnSugestao" style="align-self:flex-start">Enviar sugestão pelo WhatsApp</button>
+      </section>
+    </div>
+  `);
+  document.getElementById('btnSugestao').onclick = () => {
+    const texto = document.getElementById('sugestaoTexto').value.trim();
+    if (!texto) { toast('Escreva algo antes de enviar.', true); return; }
+    const msg = `Oi, Ricardo! Tenho uma sugestão para o app Finanças da Família: ${texto}`;
+    window.open('https://wa.me/5527992315738?text=' + encodeURIComponent(msg), '_blank', 'noopener');
+  };
+};
+
+window.__app = { get estado() { return estado; }, set estado(v) { estado = v; }, processarArquivos, irPara, salvarEstado, M, L, pdfLines, get mesAtual() { return mesAtual; }, set mesAtual(v) { mesAtual = v; } };
+iniciar();
+</script>
+</body>
+</html>
