@@ -252,18 +252,37 @@
     if (t) { t.tipo = tipo; t.categoria = categoria; t.frequencia = frequencia; }
   }
 
+  // Receita (entrada de dinheiro: salário, Pix recebido, reembolso...) não é despesa: não tem categoria de
+  // gasto nem frequência, e nunca entra no envio "Casa" para a planilha da família (Motor.itensCasa só pega
+  // valor negativo). Classificar como Pessoal/Casa aqui é só um registro de controle pra quem usa o app —
+  // por exemplo, separar "minha renda" de "dinheiro que entrou pro pote comum da família".
+  function classificarReceita(estado, chave, tipo) {
+    if (!['Pessoal', 'Casa'].includes(tipo)) throw erro('Tipo precisa ser "Pessoal" ou "Casa".');
+    estado.regras[chave] = { tipo, categoria: null, frequencia: null };
+    for (const id in estado.lancamentos) {
+      const t = estado.lancamentos[id];
+      if (!t.ignorar && t.chave === chave) { t.tipo = tipo; t.categoria = null; t.frequencia = null; }
+    }
+  }
+  function classificarReceitaUm(estado, id, tipo) {
+    if (!['Pessoal', 'Casa'].includes(tipo)) throw erro('Tipo precisa ser "Pessoal" ou "Casa".');
+    const t = estado.lancamentos[id];
+    if (t) { t.tipo = tipo; t.categoria = null; t.frequencia = null; }
+  }
+
   // ---------- tela "Novidades para classificar" ----------
   // Agrupa por estabelecimento (chave) os lançamentos ainda sem tipo, para perguntar uma vez por grupo.
+  // ehReceita (valor >= 0, dinheiro entrando) marca o grupo pra tela pedir só Pessoal/Casa, sem categoria de despesa.
   function novidades(estado) {
     const grupos = {};
     for (const id in estado.lancamentos) {
       const t = estado.lancamentos[id];
       if (t.ignorar || t.tipo) continue;
-      const g = grupos[t.chave] || (grupos[t.chave] = { chave: t.chave, descricaoExemplo: t.descricao, quantidade: 0, total: 0, origens: new Set(), ids: [] });
+      const g = grupos[t.chave] || (grupos[t.chave] = { chave: t.chave, descricaoExemplo: t.descricao, quantidade: 0, total: 0, origens: new Set(), ids: [], ehReceita: t.valor >= 0 });
       g.quantidade++; g.total += Math.abs(t.valor); g.origens.add(t.conta); g.ids.push(id);
     }
     return Object.values(grupos)
-      .map(g => ({ chave: g.chave, descricaoExemplo: g.descricaoExemplo, quantidade: g.quantidade, total: r2(g.total), origens: [...g.origens], ids: g.ids }))
+      .map(g => ({ chave: g.chave, descricaoExemplo: g.descricaoExemplo, quantidade: g.quantidade, total: r2(g.total), origens: [...g.origens], ids: g.ids, ehReceita: g.ehReceita }))
       .sort((a, b) => b.total - a.total);
   }
 
@@ -429,7 +448,7 @@
 
   g.Motor = {
     VERSAO, FREQUENCIAS, ROTULOS_CASA_PADRAO, categoriasPadrao, estadoNovo, definirNomePessoa, definirLimiteCategoria, definirRotulosCasa, importar, verificarSobreposicao, aplicarRegras,
-    classificar, classificarUm, novidades, resumoMes, orcamentoMes, mesesComLancamentos, itensCasa,
+    classificar, classificarUm, classificarReceita, classificarReceitaUm, novidades, resumoMes, orcamentoMes, mesesComLancamentos, itensCasa,
     serializar, desserializar, lancarManual, pendentesManuais, confirmarConciliacao,
     rejeitarConciliacao, conciliacoesPendentesDetalhadas, exportarResumoCSV, exportarCasaCSV, marcarCasaEnviada
   };

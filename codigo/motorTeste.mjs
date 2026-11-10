@@ -70,6 +70,21 @@ const depoisQtdMesma = Object.values(estado.lancamentos).filter(t => t.chave ===
 check('classificar aplica tipo/categoria a todos os lançamentos da chave', depoisQtdMesma.every(t => t.tipo === 'Pessoal' && t.categoria === 'Outros'));
 check('novidades diminuiu depois de classificar', M.novidades(estado).length === antes.length - 1);
 
+// 6b) Receita (dinheiro entrando, ex. Pix recebido) não deve pedir categoria de despesa nem frequência —
+// é só um registro Pessoal/Casa pro controle de quem usa o app, e nunca vai pro envio "Casa" da planilha.
+const grupoReceita = M.novidades(estado).find(g => g.ehReceita);
+check('"novidades" marca corretamente um grupo de receita (valor positivo)', !!grupoReceita);
+if (grupoReceita) {
+  M.classificarReceita(estado, grupoReceita.chave, 'Casa');
+  const lancReceita = Object.values(estado.lancamentos).filter(t => t.chave === grupoReceita.chave);
+  check('classificarReceita marca tipo mas não inventa categoria/frequência', lancReceita.every(t => t.tipo === 'Casa' && t.categoria === null && t.frequencia === null));
+  check('receita marcada Casa não entra em itensCasa (só despesa vai pra planilha)', !M.itensCasa(estado).some(t => t.chave === grupoReceita.chave));
+  const compReceita = lancReceita[0].competencia;
+  const resReceita = M.resumoMes(estado, compReceita);
+  check('receita conta em "entrou" no resumo, nunca cria categoria "null"', resReceita.entrou > 0 && !('null' in resReceita.porCategoria));
+}
+check('classificarReceita rejeita tipo inválido', (() => { try { M.classificarReceita(estado, 'X', 'Errado'); return false; } catch (err) { return err.amigavel; } })());
+
 // 7) Resumo do mês: conferir que entrou/saiu/sobrou batem com os lançamentos válidos daquele mês,
 //    e que a soma por categoria fecha com o total "saiu".
 const meses = M.mesesComLancamentos(estado);
