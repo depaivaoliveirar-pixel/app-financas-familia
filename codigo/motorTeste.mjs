@@ -170,7 +170,7 @@ check('pendentesManuais traz só quem ainda não foi conferido', M.pendentesManu
 // 12) Exportação CSV para o Excel (resumo do mês).
 const csvResumo = M.exportarResumoCSV(e2, '2026-11');
 check('CSV do resumo tem cabeçalho de lançamentos', csvResumo.includes('Data;Descrição;Categoria;Tipo;Valor;Conta;Banco'));
-check('CSV do resumo traz o valor "Saiu" calculado', csvResumo.includes('Saiu;'));
+check('CSV do resumo traz o valor "Despesa" calculado', csvResumo.includes('Despesa;'));
 check('CSV do resumo lista o lançamento manual não conciliado (m2)', csvResumo.includes('Mercado (Casa) 2'));
 
 // 13) Exportação CSV para a planilha da família ("Casa"): exige nome cadastrado antes.

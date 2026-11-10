@@ -373,9 +373,9 @@
     const r = resumoMes(estado, competencia);
     const linhas = [
       linhaCSV(['Resumo de ' + competencia]),
-      linhaCSV(['Entrou', r.entrou.toFixed(2).replace('.', ',')]),
-      linhaCSV(['Saiu', r.saiu.toFixed(2).replace('.', ',')]),
-      linhaCSV(['Sobrou', r.sobrou.toFixed(2).replace('.', ',')]),
+      linhaCSV(['Receita', r.entrou.toFixed(2).replace('.', ',')]),
+      linhaCSV(['Despesa', r.saiu.toFixed(2).replace('.', ',')]),
+      linhaCSV(['Saldo', r.sobrou.toFixed(2).replace('.', ',')]),
       '',
       linhaCSV(['Data', 'Descrição', 'Categoria', 'Tipo', 'Valor', 'Conta', 'Banco'])
     ];

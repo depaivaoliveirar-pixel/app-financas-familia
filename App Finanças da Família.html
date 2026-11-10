@@ -520,25 +520,25 @@ VIEWS.resumo = function () {
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:12px">
           <button class="btn" id="btnExportarExcel">Exportar para Excel</button>
-          <button class="btn btn-casa" data-ir="enviarCasa">Enviar Casa para a planilha da família</button>
+          <button class="btn btn-casa" data-ir="enviarCasa">Enviar Despesa de Casa para a planilha da família</button>
         </div>
       </div>
       <div class="grade">
-        <div class="card"><div style="font-size:14px;color:var(--texto2)">Entrou</div><div style="font-size:28px;font-weight:700;color:var(--verde-ok);margin-top:6px">${moeda(r.entrou)}</div></div>
-        <div class="card"><div style="font-size:14px;color:var(--texto2)">Saiu</div><div style="font-size:28px;font-weight:700;color:var(--vermelho);margin-top:6px">${moeda(r.saiu)}</div></div>
-        <div class="card"><div style="font-size:14px;color:var(--texto2)">Sobrou</div><div style="font-size:28px;font-weight:700;margin-top:6px">${moeda(r.sobrou)}</div></div>
+        <div class="card"><div style="font-size:14px;color:var(--texto2)">Receita</div><div style="font-size:28px;font-weight:700;color:var(--verde-ok);margin-top:6px">${moeda(r.entrou)}</div></div>
+        <div class="card"><div style="font-size:14px;color:var(--texto2)">Despesa</div><div style="font-size:28px;font-weight:700;color:var(--vermelho);margin-top:6px">${moeda(r.saiu)}</div></div>
+        <div class="card"><div style="font-size:14px;color:var(--texto2)">Saldo</div><div style="font-size:28px;font-weight:700;margin-top:6px;color:${r.sobrou >= 0 ? '#1D4ED8' : 'var(--vermelho)'}">${moeda(r.sobrou)}</div></div>
       </div>
       <div class="grade" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr))">
         <section class="card">
-          <h2>Pessoal × Casa</h2>
-          <div class="barra" role="img" aria-label="Pessoal e Casa">
+          <h2>Pessoal × Despesa de Casa</h2>
+          <div class="barra" role="img" aria-label="Pessoal e Despesa de Casa">
             <div style="width:${pct(r.pessoalXcasa.Pessoal, r.saiu)}%;background:#1D4ED8"></div>
             <div style="width:${pct(r.pessoalXcasa.Casa, r.saiu)}%;background:#B45309"></div>
             <div style="width:${pct(r.pessoalXcasa['Sem classificar'], r.saiu)}%;background:#B9C4C1"></div>
           </div>
           <div style="display:flex;justify-content:space-between;gap:12px;margin-top:14px;font-size:15px;flex-wrap:wrap">
             <span><strong style="color:#1D4ED8">Pessoal</strong> ${moeda(r.pessoalXcasa.Pessoal || 0)}</span>
-            <span><strong style="color:#92400E">Casa</strong> ${moeda(r.pessoalXcasa.Casa || 0)}</span>
+            <span><strong style="color:#92400E">Despesa de Casa</strong> ${moeda(r.pessoalXcasa.Casa || 0)}</span>
             ${r.pessoalXcasa['Sem classificar'] ? `<span><strong>Sem classificar</strong> ${moeda(r.pessoalXcasa['Sem classificar'])}</span>` : ''}
           </div>
         </section>
@@ -642,12 +642,12 @@ VIEWS.enviarCasa = function () {
   layout(`
     <div style="display:flex;flex-direction:column;gap:20px;max-width:880px;margin:0 auto">
       <button class="btn" data-ir="resumo">‹ Voltar ao resumo</button>
-      <h1>Enviar Casa para a planilha da família — ${mesFmt(mesAtual)}</h1>
+      <h1>Enviar Despesa de Casa para a planilha da família — ${mesFmt(mesAtual)}</h1>
       <section class="card">
         <p class="sub">Só vão os gastos marcados como <strong style="color:#92400E">Casa</strong>. Os gastos pessoais continuam só neste computador.</p>
         <div class="grade">
-          <div style="background:var(--amarelo-bg);border-radius:12px;padding:16px"><div style="font-size:13px;color:var(--texto2)">Lançamentos da Casa</div><div style="font-size:24px;font-weight:700">${itens.length}</div></div>
-          <div style="background:var(--amarelo-bg);border-radius:12px;padding:16px"><div style="font-size:13px;color:var(--texto2)">Total da Casa</div><div style="font-size:24px;font-weight:700">${moeda(total)}</div></div>
+          <div style="background:var(--amarelo-bg);border-radius:12px;padding:16px"><div style="font-size:13px;color:var(--texto2)">Lançamentos de Despesa de Casa</div><div style="font-size:24px;font-weight:700">${itens.length}</div></div>
+          <div style="background:var(--amarelo-bg);border-radius:12px;padding:16px"><div style="font-size:13px;color:var(--texto2)">Total de Despesa de Casa</div><div style="font-size:24px;font-weight:700">${moeda(total)}</div></div>
           <div style="background:var(--bg);border-radius:12px;padding:16px"><div style="font-size:13px;color:var(--texto2)">Já enviados antes</div><div style="font-size:24px;font-weight:700">${jaEnviados}</div></div>
         </div>
       </section>
@@ -769,7 +769,7 @@ VIEWS.ajustes = function () {
       <h1>Ajustes</h1>
       <section class="card" style="display:flex;flex-direction:column;gap:16px">
         <h2>Seus dados</h2>
-        <label class="campo">Seu nome (usado ao enviar itens Casa como exceção)
+        <label class="campo">Seu nome (usado ao enviar Despesa de Casa como exceção)
           <input type="text" id="ajNome" value="${estado.nomePessoa || ''}">
         </label>
         <button class="btn btn-primario" id="ajSalvarNome" style="align-self:flex-start">Salvar nome</button>
@@ -818,7 +818,7 @@ VIEWS.ajuda = function () {
         <ol style="margin:0;padding-left:22px;font-size:15px;color:var(--texto4);line-height:1.8">
           <li>Na tela Início, arraste os extratos e faturas do mês.</li>
           <li>Em Classificar, diga Pessoal ou Casa + categoria a cada lugar novo (uma vez só).</li>
-          <li>Em Resumo, acompanhe o mês e exporte para Excel ou envie a Casa para a planilha da família.</li>
+          <li>Em Resumo, acompanhe o mês e exporte para Excel ou envie a Despesa de Casa para a planilha da família.</li>
           <li>Em Ajustes, você define limites por categoria (opcional) e troca a pasta dos dados.</li>
         </ol>
       </section>
