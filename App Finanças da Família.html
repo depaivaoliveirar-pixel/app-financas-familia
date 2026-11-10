@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Finanças da Família</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
 <style>
   :root{
     --verde:#0F5E57; --verde-escuro:#0B4741;
@@ -36,6 +36,7 @@
   .card{background:var(--card);border:1px solid var(--borda);border-radius:16px;padding:24px}
   .grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
   h1{margin:0 0 8px;font-size:28px}
+  .fonte-capa{font-family:'Fraunces',Georgia,serif}
   h2{margin:0 0 16px;font-size:18px}
   p.sub{margin:0 0 20px;font-size:16px;color:var(--texto2);line-height:1.5}
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:12px;border:1px solid var(--cinza-borda);background:#fff;font-size:15px;font-weight:600;color:var(--texto);text-decoration:none}
@@ -191,6 +192,7 @@ async function iniciar() {
     const e = await carregarEstadoDaPasta();
     if (e) { estado = e; }
   }
+  if (!estado) viewAtual = 'capa';
   renderizar();
 }
 
@@ -227,7 +229,7 @@ function layout(conteudoHtml) {
 }
 
 function renderizar() {
-  if (!estadoPronto() && viewAtual !== 'configuracaoInicial' && viewAtual !== 'sobre') {
+  if (!estadoPronto() && !['configuracaoInicial', 'sobre', 'capa', 'resumoApp'].includes(viewAtual)) {
     renderConfiguracaoInicial();
     return;
   }
@@ -809,11 +811,60 @@ VIEWS.ajustes = function () {
   };
 };
 
+/* ---------- Capa (1ª tela, antes de configurar) ---------- */
+const ICONE_CASA_MOEDAS = `
+  <svg width="100" height="86" viewBox="0 0 140 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M40 60 L70 34 L100 60" stroke="#0F5E57" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M46 56 V92 a3 3 0 0 0 3 3 H91 a3 3 0 0 0 3-3 V56" stroke="#0F5E57" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="62" y="70" width="16" height="25" rx="2" stroke="#0F5E57" stroke-width="4"/>
+    <circle cx="20" cy="98" r="15" fill="#FFF7ED" stroke="#B45309" stroke-width="4"/>
+    <circle cx="20" cy="98" r="6.5" stroke="#B45309" stroke-width="2.5"/>
+    <circle cx="120" cy="98" r="15" fill="#EFF4FF" stroke="#1D4ED8" stroke-width="4"/>
+    <circle cx="120" cy="98" r="6.5" stroke="#1D4ED8" stroke-width="2.5"/>
+  </svg>`;
+
+VIEWS.capa = function () {
+  document.getElementById('app').innerHTML = `
+    <main style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#F4F6F5,#E6EFEC);padding:24px">
+      <div style="max-width:460px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:22px">
+        ${ICONE_CASA_MOEDAS}
+        <h1 class="fonte-capa" style="font-size:42px;font-weight:600;margin:0;color:var(--texto);line-height:1.15">Finanças da Família</h1>
+        <p style="margin:0;font-size:17px;color:var(--texto2);line-height:1.5">Um jeito simples de organizar as contas de casa, sem complicação.</p>
+        <button class="btn btn-primario btn-grande" id="capaProximo" style="margin-top:8px;padding:0 40px">Próximo</button>
+      </div>
+    </main>
+  `;
+  document.getElementById('capaProximo').onclick = () => irPara('resumoApp');
+};
+
+/* ---------- Resumo rápido (2ª tela) ---------- */
+VIEWS.resumoApp = function () {
+  document.getElementById('app').innerHTML = `
+    <main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px">
+      <div style="max-width:560px;display:flex;flex-direction:column;gap:22px;text-align:center;align-items:center">
+        <h1 class="fonte-capa" style="font-size:30px;margin:0;font-weight:600">Do que se trata</h1>
+        <p style="margin:0;font-size:17px;color:var(--texto4);line-height:1.6">
+          Você arrasta os extratos do banco, diz uma vez se cada gasto é <strong style="color:#1D4ED8">Pessoal</strong>
+          ou de <strong style="color:#92400E">Casa</strong>, e vê o resumo do mês. Tudo roda só no seu computador —
+          sem internet, sem IA. Se quiser, dá pra juntar as despesas de Casa com quem mora com você numa planilha
+          compartilhada.
+        </p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px">
+          <button class="btn" id="resumoSobre">Saiba mais</button>
+          <button class="btn btn-primario btn-grande" id="resumoIniciar" style="padding:0 36px">Iniciar</button>
+        </div>
+      </div>
+    </main>
+  `;
+  document.getElementById('resumoSobre').onclick = () => irPara('sobre');
+  document.getElementById('resumoIniciar').onclick = () => irPara('inicio');
+};
+
 /* ---------- Sobre ---------- */
 VIEWS.sobre = function () {
   layout(`
     <div style="display:flex;flex-direction:column;gap:20px;max-width:720px;margin:0 auto">
-      <h1>Sobre o Finanças da Família</h1>
+      <h1 class="fonte-capa">Sobre o Finanças da Família</h1>
       <section class="card">
         <h2>O que é este app</h2>
         <p style="margin:0;font-size:15px;color:var(--texto4);line-height:1.6">
@@ -847,9 +898,11 @@ VIEWS.sobre = function () {
           com outra pessoa.
         </p>
       </section>
+      ${!estado ? `<button class="btn btn-primario btn-grande" id="sobreComecar" style="align-self:flex-start">Começar</button>` : ''}
       <p style="margin:0;font-size:13px;color:var(--texto3)">O visual do app ainda vai mudar — essa é uma versão simples, pra testar se tudo funciona direito primeiro.</p>
     </div>
   `);
+  document.getElementById('sobreComecar')?.addEventListener('click', () => irPara('inicio'));
 };
 
 /* ---------- Ajuda ---------- */
