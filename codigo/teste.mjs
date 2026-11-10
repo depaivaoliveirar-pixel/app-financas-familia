@@ -1,6 +1,8 @@
 // Teste dos leitores com as amostras reais. Uso (na pasta codigo):
 //   npm install        (uma vez)
-//   set SENHA_PDF_XP=xxxxx   (Windows; senha do PDF da fatura XP — pedir ao Ricardo, não gravar em arquivo)
+//   set SENHA_PDF_XP=xxxxx   (Windows; senha do PDF da fatura XP — não gravar em arquivo)
+//   set NOME_TITULAR=Nome Completo do Titular   (opcional; precisa bater com o nome usado nas amostras reais
+//                                                 para o teste de "transferência entre contas" funcionar certo)
 //   node teste.mjs [nome-do-arquivo-para-listar-tudo]
 import fs from 'fs';
 import path from 'path';
@@ -30,7 +32,7 @@ let falhas = 0;
 for (const [nome, senha, esperado] of arqs) {
   try {
     const r = await L.lerArquivo(nome, new Uint8Array(fs.readFileSync(path.join(S, nome))), {
-      senha, nomesTitular: ['Ricardo de Paiva Oliveira'], linhasPDF: (b, pw) => pdfLines(pdfjs, b.slice(), pw) });
+      senha, nomesTitular: [process.env.NOME_TITULAR || 'Nome Completo do Titular'], linhasPDF: (b, pw) => pdfLines(pdfjs, b.slice(), pw) });
     const ok = r.lancamentos.filter(t => !t.ignorar), ig = r.lancamentos.filter(t => t.ignorar);
     const soma = Math.round(ok.reduce((s, t) => s + t.valor, 0) * 100) / 100;
     const passou = esperado === null || soma === esperado;

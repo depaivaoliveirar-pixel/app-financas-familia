@@ -1,5 +1,6 @@
 // Teste do motor (regras, resumo do mês, sobreposição de período) com as amostras reais.
 // Uso (na pasta codigo): node motorTeste.mjs
+//   set NOME_TITULAR=Nome Completo do Titular   (opcional; precisa bater com o nome usado nas amostras reais)
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -10,7 +11,8 @@ import './motor.js';
 const L = globalThis.Leitores, M = globalThis.Motor;
 const S = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'amostras');
 const senhaXP = process.env.SENHA_PDF_XP;
-const opcoes = { nomesTitular: ['Ricardo de Paiva Oliveira'], linhasPDF: (b, pw) => pdfLines(pdfjs, b.slice(), pw) };
+const nomeTitular = process.env.NOME_TITULAR || 'Nome Completo do Titular';
+const opcoes = { nomesTitular: [nomeTitular], linhasPDF: (b, pw) => pdfLines(pdfjs, b.slice(), pw) };
 
 let falhas = 0;
 function check(desc, condicao) {
@@ -22,7 +24,7 @@ async function ler(nome, senha) {
   return L.lerArquivo(nome, new Uint8Array(fs.readFileSync(path.join(S, nome))), Object.assign({}, opcoes, { senha }));
 }
 
-const estado = M.estadoNovo('padrao', ['Ricardo de Paiva Oliveira']);
+const estado = M.estadoNovo('padrao', [nomeTitular]);
 
 // 1) Primeira importação: extrato BB (OFX) de outubro/2026 — não deve haver aviso de sobreposição.
 const bbOfx = await ler('Extrato conta corrente - 102026.ofx');
@@ -99,7 +101,7 @@ check('perfil padrão tem a lista curta de categorias', M.categoriasPadrao('padr
 check('perfil priscila usa as categorias da planilha da família', M.categoriasPadrao('priscila').includes('Aporte metas'));
 
 // 11) Lançamento manual + conciliação com o extrato. Estado novo, independente do de cima.
-const e2 = M.estadoNovo('padrao', ['Ricardo de Paiva Oliveira']);
+const e2 = M.estadoNovo('padrao', ['Ana Pereira Costa']);
 
 // 11a) Validações básicas.
 check('lançarManual exige os campos obrigatórios', (() => { try { M.lancarManual(e2, { data: '2026-11-05' }); return false; } catch (err) { return err.amigavel; } })());
@@ -159,13 +161,13 @@ check('CSV do resumo lista o lançamento manual não conciliado (m2)', csvResumo
 // 13) Exportação CSV para a planilha da família ("Casa"): exige nome cadastrado antes.
 check('exportarCasaCSV exige nome cadastrado', (() => { try { M.exportarCasaCSV(e2, '2026-11'); return false; } catch (err) { return err.amigavel; } })());
 check('definirNomePessoa rejeita nome vazio', (() => { try { M.definirNomePessoa(e2, '   '); return false; } catch (err) { return err.amigavel; } })());
-M.definirNomePessoa(e2, 'Ricardo');
+M.definirNomePessoa(e2, 'Ana');
 const casaNov = M.exportarCasaCSV(e2, '2026-11');
 check('CSV da Casa tem cabeçalho com as colunas da planilha da família', casaNov.texto.startsWith('Data;Descrição;Categoria;Tipo;Pago por;Origem;Valor;Observação;ID'));
 // Nesta altura, os únicos itens Casa do mês são lançamentos manuais (os importados foram conciliados e
 // ficaram "ignorar"): "Pago por"/"Origem" devem vir como a exceção prevista na planilha real da família
 // (aba Regras: despesa comum normal vem da conta conjunta/cartão comum; manual é sempre a exceção).
-check('CSV da Casa marca lançamento manual como exceção com o nome cadastrado', casaNov.texto.includes(';Ricardo (exceção);Lançamento manual;'));
+check('CSV da Casa marca lançamento manual como exceção com o nome cadastrado', casaNov.texto.includes(';Ana (exceção);Lançamento manual;'));
 check('CSV da Casa só traz itens Casa do mês pedido', casaNov.quantidade === M.itensCasa(e2, '2026-11').length && casaNov.quantidade > 0);
 check('CSV da Casa traz o valor positivo (despesa)', /;80\.00;/.test(casaNov.texto));
 M.marcarCasaEnviada(e2, casaNov.ids);
@@ -174,8 +176,8 @@ check('marcarCasaEnviada grava a data de envio em cada item', casaNov.ids.every(
 // 14) "Pago por"/"Origem" no fluxo normal (extrato/fatura importado, Casa): deve usar "Conta conjunta" /
 // "Cartão comum" (e não o nome de ninguém), conforme a regra já decidida na planilha real da família
 // (Regras, 09/11/2026: despesa comum sempre pela conta conjunta BB ou pelo cartão comum).
-const e3 = M.estadoNovo('padrao', ['Ricardo de Paiva Oliveira']);
-M.definirNomePessoa(e3, 'Priscila');
+const e3 = M.estadoNovo('padrao', ['Ana Pereira Costa']);
+M.definirNomePessoa(e3, 'Beatriz');
 const extratoConjunta = {
   banco: 'BB', tipo: 'Conta', arquivo: 'conjunta-teste.ofx',
   lancamentos: [{ id: 'BB:conjunta:1', banco: 'BB', origem: 'conta', conta: 'BB conta 1234', data: '2026-11-07', competencia: '2026-11', descricao: 'PADARIA DO BAIRRO', chave: 'PADARIA DO BAIRRO', valor: -45, portador: '', parcela: '', ignorar: null, formato: 'OFX' }]
@@ -191,7 +193,7 @@ M.classificar(e3, 'FARMACIA', 'Casa', 'Saúde', 'Variável');
 const casaConjunta = M.exportarCasaCSV(e3, '2026-11');
 check('item de extrato de conta vira "Conta conjunta" / "Extrato conjunta"', casaConjunta.texto.includes(';Conta conjunta;Extrato conjunta;'));
 check('item de fatura de cartão vira "Cartão comum" / "Fatura cartão comum"', casaConjunta.texto.includes(';Cartão comum;Fatura cartão comum;'));
-check('nenhum item do fluxo normal usa o nome da pessoa em "Pago por"', !casaConjunta.texto.includes('Priscila'));
+check('nenhum item do fluxo normal usa o nome da pessoa em "Pago por"', !casaConjunta.texto.includes('Beatriz'));
 
 // 14b) Rótulos de "Pago por"/"Origem" são configuráveis — outra família (ex.: pai, irmão, com outra
 // estrutura) pode usar outros nomes sem mudar o motor, só cadastrando os próprios rótulos.

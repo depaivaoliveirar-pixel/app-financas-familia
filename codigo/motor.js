@@ -366,13 +366,13 @@
     return linhas.join('\r\n');
   }
 
-  // "Pago por" e "Origem" na planilha real da família são listas fechadas (aba Listas), não texto livre —
-  // refletem a regra já decidida lá (aba Regras, 09/11/2026): despesa comum sempre passa pela conta conjunta
-  // BB ou pelo cartão comum; Ricardo só paga despesa comum fora disso em exceção (boleto, lançado manualmente).
-  // Por isso: todo lançamento importado (extrato/fatura) é, por definição, da conta conjunta/cartão comum;
-  // todo lançamento manual é a exceção, com o nome de quem lançou.
-  // Rótulos padrão: servem para a família do Ricardo (conta conjunta BB + cartão comum). Outra família
-  // (pai, irmão, com outra estrutura — casal, sozinho, etc.) pode usar outros nomes sem mudar o motor,
+  // "Pago por" e "Origem", numa planilha de família compartilhada, costumam ser listas fechadas (não texto
+  // livre): despesa comum sempre passa pela conta conjunta ou pelo cartão comum; alguém só paga despesa comum
+  // fora disso em exceção (ex. boleto, lançado manualmente). Por isso: todo lançamento importado (extrato/
+  // fatura) é, por definição, da conta conjunta/cartão comum; todo lançamento manual é a exceção, com o nome
+  // de quem lançou.
+  // Rótulos padrão: servem pra um casal com conta conjunta + cartão comum. Outra família
+  // (estrutura diferente — pessoa sozinha, outro arranjo, etc.) pode usar outros nomes sem mudar o motor,
   // só ajustando Motor.definirRotulosCasa — o que importa pro Apps Script é que os rótulos usados aqui
   // sejam exatamente os mesmos cadastrados na lista "Pago por"/"Origem" da planilha de cada família.
   const ROTULOS_CASA_PADRAO = { contaComum: 'Conta conjunta', extratoContaComum: 'Extrato conjunta', cartaoComum: 'Cartão comum', faturaCartaoComum: 'Fatura cartão comum' };

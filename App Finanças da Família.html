@@ -203,7 +203,7 @@ let viewAtual = 'inicio';
 function irPara(v) { viewAtual = v; renderizar(); }
 
 function layout(conteudoHtml) {
-  const perfilLabel = estado ? (estado.nomePessoa || (estado.perfil === 'priscila' ? 'Priscila' : 'Minha conta')) : '';
+  const perfilLabel = estado ? (estado.nomePessoa || 'Minha conta') : '';
   const qtdNovidades = estado ? M.novidades(estado).length : 0;
   const abas = [
     ['inicio', 'Início'], ['classificar', 'Classificar'], ['resumo', 'Resumo'],
@@ -242,20 +242,20 @@ function renderConfiguracaoInicial() {
         <h1>Bem-vindo(a) ao Finanças da Família</h1>
         <p class="sub">Antes de começar, escolha a pasta onde o app vai guardar seus dados (só neste computador, sem internet) e conte um pouco sobre você.</p>
         ${location.protocol === 'file:' ? `<div style="background:var(--vermelho-bg);border-radius:10px;padding:14px 16px;font-size:14px;color:var(--vermelho-texto);margin-bottom:16px;line-height:1.5">
-          <strong>Abra este arquivo de um jeito diferente:</strong> escolher a pasta não funciona abrindo o arquivo direto (clique duplo). Siga as instruções que vieram junto com o app para abrir certo (ou fale com o Ricardo).
+          <strong>Abra este arquivo de um jeito diferente:</strong> escolher a pasta não funciona abrindo o arquivo direto (clique duplo). Siga as instruções que vieram junto com o app para abrir certo.
         </div>` : ''}
         <div style="display:flex;flex-direction:column;gap:16px">
           <label class="campo">Seu nome
-            <input type="text" id="cfgNome" placeholder="Ex.: Ricardo">
+            <input type="text" id="cfgNome" placeholder="Ex.: Maria">
           </label>
           <label class="campo">Perfil de categorias
             <select id="cfgPerfil">
               <option value="padrao">Padrão (categorias curtas)</option>
-              <option value="priscila">Priscila (categorias da planilha da família)</option>
+              <option value="priscila">Completo (categorias de moradia, filhos, seguros, metas...)</option>
             </select>
           </label>
           <label class="campo">Seu nome completo, para identificar transferências entre suas próprias contas (opcional)
-            <input type="text" id="cfgTitular" placeholder="Ex.: Ricardo de Paiva Oliveira">
+            <input type="text" id="cfgTitular" placeholder="Ex.: Maria da Silva Santos">
           </label>
           <button class="btn btn-primario btn-grande" id="cfgContinuar">Escolher pasta e começar</button>
           <p style="margin:0;font-size:13px;color:var(--texto3)">Precisa ser no Chrome ou Edge, no computador — não funciona no celular.</p>
