@@ -277,6 +277,9 @@ function renderConfiguracaoInicial() {
       <div class="card">
         <h1>Bem-vindo(a) ao Finanças da Família</h1>
         <p class="sub">Antes de começar, escolha a pasta onde o app vai guardar seus dados (só neste computador, sem internet) e conte um pouco sobre você. Não sabe do que se trata? <a href="#" id="cfgSobre">Veja do que é este app</a>.</p>
+        <div style="background:var(--cinza-bg);border-radius:10px;padding:14px 16px;font-size:14px;color:var(--texto4);margin-bottom:16px;line-height:1.5">
+          <strong>Onde salvar:</strong> escolha (ou crie) uma pasta só sua, por exemplo <code>Documentos\\Finanças</code>. Esse arquivo guarda seus gastos <strong>Pessoais</strong> também — evite escolher uma pasta do Google Drive compartilhada com outras pessoas, pra ninguém mais conseguir ver.
+        </div>
         ${location.protocol === 'file:' ? `<div style="background:var(--vermelho-bg);border-radius:10px;padding:14px 16px;font-size:14px;color:var(--vermelho-texto);margin-bottom:16px;line-height:1.5">
           <strong>Abra este arquivo de um jeito diferente:</strong> escolher a pasta não funciona abrindo o arquivo direto (clique duplo). Siga as instruções que vieram junto com o app para abrir certo.
         </div>` : ''}
@@ -556,7 +559,7 @@ VIEWS.resumo = function () {
           <button type="button" aria-label="Próximo mês" id="mesProximo" class="btn" style="width:44px;height:44px;padding:0" ${idx <= 0 ? 'disabled' : ''}>›</button>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:12px">
-          <button class="btn" id="btnExportarExcel">Exportar para Excel</button>
+          <button class="btn" id="btnExportarExcel" title="Gera um arquivo .csv, que o Excel abre normalmente">Exportar para Excel (.csv)</button>
           <button class="btn btn-casa" data-ir="enviarCasa">Enviar Despesa de Casa para a planilha da família</button>
         </div>
       </div>
@@ -994,6 +997,27 @@ VIEWS.ajuda = function () {
           <li>Em Ajustes, você define limites por categoria (opcional) e troca a pasta dos dados.</li>
         </ol>
       </section>
+      <section class="card">
+        <h2>Se você divide despesas com alguém (planilha compartilhada)</h2>
+        <p class="sub" style="margin-bottom:12px">Pra juntar os gastos de <strong style="color:#92400E">Casa</strong> numa planilha com quem mora com você, os dois precisam configurar do mesmo jeito. Se qualquer um desses passos faltar, o arquivo pode ser gerado certinho e mesmo assim não aparecer na planilha.</p>
+        <ol style="margin:0;padding-left:22px;font-size:15px;color:var(--texto4);line-height:1.8">
+          <li>Combinem: os dois vão usar o app, e os dois vão marcar "Casa" os mesmos tipos de gasto.</li>
+          <li>Instalem o Google Drive para computador (drive.google.com) e entrem na mesma pasta compartilhada (ex.: "Extratos e faturas - conta conjunta").</li>
+          <li>Cada um, em <strong>Ajustes</strong>, escolhe essa pasta sincronizada como "pasta compartilhada" — assim o arquivo vai direto pra lá, sem precisar mover na mão.</li>
+          <li>Cada um cadastra o link da planilha da família em <strong>Ajustes</strong>, pra poder abri-la direto do app.</li>
+          <li>Quem administra a planilha instala o script uma vez (arquivo <code>codigo/appsScriptCasa.gs</code> do projeto — peça ajuda a quem configurou o app pra você).</li>
+          <li>Pronto: depois de classificar "Casa" e clicar em "Enviar Despesa de Casa" no Resumo, quem administra a planilha abre ela e usa o menu "Finanças da Família > Importar gastos da Casa".</li>
+        </ol>
+      </section>
+      <section class="card">
+        <h2>Se você não divide despesas com ninguém</h2>
+        <p style="margin:0;font-size:15px;color:var(--texto4);line-height:1.6">Não precisa de nada da seção acima — use o app só pra classificar Pessoal/Casa e ver seu resumo do mês. O botão "Enviar Despesa de Casa" só importa pra quem for juntar as contas com outra pessoa.</p>
+      </section>
+      <section class="card" style="display:flex;flex-direction:column;gap:14px">
+        <h2>Convidar quem divide despesas com você</h2>
+        <p style="margin:0;font-size:15px;color:var(--texto2)">Manda uma mensagem pronta pelo WhatsApp convidando a pessoa a usar o app também (sem isso, o passo a passo acima não funciona sozinho).</p>
+        <button class="btn btn-primario" id="btnConvite" style="align-self:flex-start">Gerar convite pelo WhatsApp</button>
+      </section>
       <section class="card" style="display:flex;flex-direction:column;gap:14px">
         <h2>Sugerir uma melhoria</h2>
         <p style="margin:0;font-size:15px;color:var(--texto2)">Sem compromisso de implementar — é só pra eu juntar ideias da família.</p>
@@ -1007,6 +1031,10 @@ VIEWS.ajuda = function () {
     if (!texto) { toast('Escreva algo antes de enviar.', true); return; }
     const msg = `Oi, Ricardo! Tenho uma sugestão para o app Finanças da Família: ${texto}`;
     window.open('https://wa.me/5527992315738?text=' + encodeURIComponent(msg), '_blank', 'noopener');
+  };
+  document.getElementById('btnConvite').onclick = () => {
+    const msg = 'Oi! Estou usando um app simples (Finanças da Família) pra organizar os gastos de casa, sem precisar de internet. Queria juntar os gastos da Casa com você numa planilha compartilhada — topa usar também? Te mando o app e o passo a passo de como configurar.';
+    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank', 'noopener');
   };
 };
 
