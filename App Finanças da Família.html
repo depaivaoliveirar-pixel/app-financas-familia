@@ -162,6 +162,39 @@ async function carregarEstadoDaPasta() {
   } catch (e) { return null; }
 }
 
+// Pasta compartilhada do Google Drive da família (opcional, separada da pasta de dados principal) — pra
+// salvar o arquivo da Casa direto nela, sem download manual. Mesmo mecanismo da pasta de dados (IndexedDB).
+let pastaCasaHandle = null;
+async function escolherPastaCasa() {
+  pastaCasaHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+  await guardarValor('pastaCasaHandle', pastaCasaHandle);
+  return pastaCasaHandle;
+}
+async function recuperarPastaCasa() {
+  const h = await lerValor('pastaCasaHandle');
+  if (!h) return null;
+  try {
+    const perm = await h.queryPermission({ mode: 'readwrite' });
+    if (perm === 'granted') { pastaCasaHandle = h; return h; }
+    return null;
+  } catch (e) { return null; }
+}
+async function pedirPermissaoPastaCasa(h) {
+  const perm = await h.requestPermission({ mode: 'readwrite' });
+  if (perm === 'granted') { pastaCasaHandle = h; return true; }
+  return false;
+}
+async function esquecerPastaCasa() {
+  pastaCasaHandle = null;
+  await guardarValor('pastaCasaHandle', null);
+}
+async function salvarArquivoNaPastaCasa(texto, nome) {
+  const fh = await pastaCasaHandle.getFileHandle(nome, { create: true });
+  const ws = await fh.createWritable();
+  await ws.write('﻿' + texto);
+  await ws.close();
+}
+
 /* ---------------- estado global do app ---------------- */
 let estado = null;
 let mesAtual = null;
@@ -187,6 +220,7 @@ function toast(msg, ehErro) {
 
 /* ---------------- ciclo de vida ---------------- */
 async function iniciar() {
+  await recuperarPastaCasa();
   const h = await recuperarPasta();
   if (h) {
     const e = await carregarEstadoDaPasta();
@@ -654,23 +688,40 @@ VIEWS.enviarCasa = function () {
           <div style="background:var(--bg);border-radius:12px;padding:16px"><div style="font-size:13px;color:var(--texto2)">Já enviados antes</div><div style="font-size:24px;font-weight:700">${jaEnviados}</div></div>
         </div>
       </section>
+      ${estado.linkPlanilhaFamilia ? `<section class="card" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+        <div>
+          <h2 style="margin:0 0 4px">Planilha da família</h2>
+          <p style="margin:0;font-size:14px;color:var(--texto2)">Pra ver o encontro de contas depois de enviar.</p>
+        </div>
+        <a href="${estado.linkPlanilhaFamilia}" target="_blank" rel="noopener" class="btn btn-primario">Abrir planilha da família</a>
+      </section>` : `<section class="card" style="background:var(--cinza-bg)">
+        <p style="margin:0;font-size:15px;color:var(--texto4)">Você ainda não tem o link da planilha da família cadastrado. Sem ele, dá pra enviar os dados, mas não dá pra abrir o encontro de contas direto daqui. <a href="#" id="irAjustesLink">Cadastrar em Ajustes</a>.</p>
+      </section>`}
       ${!estado.nomePessoa ? `<section class="card" style="background:var(--amarelo-bg);border-color:var(--amarelo-borda)"><p class="sub" style="margin:0">Cadastre seu nome em Ajustes antes de enviar.</p></section>` : `
       <section class="card" style="display:flex;flex-direction:column;gap:16px">
         <h2>Enviar</h2>
-        <p style="margin:0;font-size:15px;color:var(--texto2)">O arquivo é salvo na pasta de dados do app. Depois, mova/copie para a pasta compartilhada do Google Drive da família.</p>
-        <button type="button" class="btn btn-casa btn-grande" id="btnEnviarCasa" style="align-self:flex-start">Gerar e baixar arquivo</button>
+        <p style="margin:0;font-size:15px;color:var(--texto2)">${pastaCasaHandle
+          ? `O arquivo é salvo direto na pasta compartilhada configurada (<strong>${pastaCasaHandle.name}</strong>) — não precisa mover nada depois.`
+          : `Seu navegador vai abrir uma janela perguntando onde salvar o arquivo — escolha a pasta do Google Drive compartilhada com a família. Se preferir não escolher toda vez, configure a pasta compartilhada em Ajustes e o app passa a salvar direto nela.`}</p>
+        <button type="button" class="btn btn-casa btn-grande" id="btnEnviarCasa" style="align-self:flex-start">${pastaCasaHandle ? 'Salvar na pasta compartilhada' : 'Gerar arquivo'}</button>
       </section>`}
       <p style="margin:0;font-size:13px;color:var(--texto3)">A planilha da família lê o arquivo e lança na aba Lançamentos sem repetir o que já entrou.</p>
     </div>
   `);
+  document.getElementById('irAjustesLink')?.addEventListener('click', (e) => { e.preventDefault(); irPara('ajustes'); });
   document.getElementById('btnEnviarCasa')?.addEventListener('click', async () => {
     try {
       const { texto, ids } = M.exportarCasaCSV(estado, mesAtual);
       const nome = `Casa_${estado.nomePessoa.replace(/\s+/g, '')}_${mesAtual}_${Date.now()}.csv`;
-      baixarArquivo(texto, nome);
+      if (pastaCasaHandle) {
+        await salvarArquivoNaPastaCasa(texto, nome);
+        toast('Arquivo salvo na pasta compartilhada!');
+      } else {
+        baixarArquivo(texto, nome);
+        toast('Arquivo gerado! Escolha a pasta compartilhada do Google Drive da família ao salvar.');
+      }
       M.marcarCasaEnviada(estado, ids);
       await salvarEstado();
-      toast('Arquivo gerado! Agora mova/copie para a pasta compartilhada do Google Drive.');
       irPara('enviarCasa');
     } catch (e) { toast(e.message, true); }
   });
@@ -791,6 +842,19 @@ VIEWS.ajustes = function () {
         <p style="margin:0;font-size:14px;color:var(--texto2)">Pasta: ${pastaHandle ? pastaHandle.name : '—'}</p>
         <button class="btn" id="ajTrocarPasta" style="align-self:flex-start">Trocar pasta</button>
       </section>
+      <section class="card" style="display:flex;flex-direction:column;gap:16px">
+        <h2>Planilha da família <span style="font-weight:400;color:var(--texto3);font-size:14px">(opcional — só pra quem compartilha a Despesa de Casa com outra pessoa)</span></h2>
+        <label class="campo">Link da planilha (Google Sheets)
+          <input type="text" id="ajLinkPlanilha" value="${estado.linkPlanilhaFamilia || ''}" placeholder="https://docs.google.com/spreadsheets/...">
+        </label>
+        <button class="btn btn-primario" id="ajSalvarLink" style="align-self:flex-start">Salvar link</button>
+        <div style="height:1px;background:var(--borda)"></div>
+        <p style="margin:0;font-size:14px;color:var(--texto2)">Pasta compartilhada do Google Drive (pra salvar o arquivo da Casa direto nela, sem precisar mover depois): ${pastaCasaHandle ? pastaCasaHandle.name : 'não configurada'}</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn" id="ajEscolherPastaCasa">${pastaCasaHandle ? 'Trocar pasta compartilhada' : 'Escolher pasta compartilhada'}</button>
+          ${pastaCasaHandle ? '<button class="btn" id="ajEsquecerPastaCasa">Parar de usar</button>' : ''}
+        </div>
+      </section>
     </div>
   `);
   document.getElementById('ajSalvarNome').onclick = async () => {
@@ -809,6 +873,17 @@ VIEWS.ajustes = function () {
     try { await escolherPasta(); await salvarEstado(); toast('Pasta atualizada.'); irPara('ajustes'); }
     catch (e) { if (e.name !== 'AbortError') toast(e.message, true); }
   };
+  document.getElementById('ajSalvarLink').onclick = async () => {
+    try { M.definirLinkPlanilhaFamilia(estado, document.getElementById('ajLinkPlanilha').value); await salvarEstado(); toast('Link salvo.'); }
+    catch (e) { toast(e.message, true); }
+  };
+  document.getElementById('ajEscolherPastaCasa').onclick = async () => {
+    try { await escolherPastaCasa(); toast('Pasta compartilhada configurada.'); irPara('ajustes'); }
+    catch (e) { if (e.name !== 'AbortError') toast(e.message, true); }
+  };
+  document.getElementById('ajEsquecerPastaCasa')?.addEventListener('click', async () => {
+    await esquecerPastaCasa(); toast('Pasta compartilhada removida.'); irPara('ajustes');
+  });
 };
 
 /* ---------- Capa (1ª tela, antes de configurar) ---------- */

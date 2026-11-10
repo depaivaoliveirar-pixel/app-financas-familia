@@ -26,6 +26,7 @@
       perfil: perfil || 'padrao',
       nomesTitular: (nomesTitular || []).slice(),
       nomePessoa: '', // "Pago por" no envio à planilha da família; cadastrado 1x em Ajustes
+      linkPlanilhaFamilia: '', // link do Google Sheets, pra abrir de dentro do app; ver Motor.definirLinkPlanilhaFamilia
       rotulosCasa: null, // null = usa os padrões (ROTULOS_CASA_PADRAO); ver Motor.definirRotulosCasa
       categorias: categoriasPadrao(perfil),
       limites: {}, // limite mensal opcional por categoria, ex.: {Mercado: 1500} — ver Motor.definirLimiteCategoria/orcamentoMes
@@ -41,6 +42,14 @@
     nome = String(nome || '').trim();
     if (!nome) throw erro('Informe seu nome.');
     estado.nomePessoa = nome;
+  }
+
+  // Link da planilha da família (Google Sheets), pra abrir de dentro do app na tela "Enviar Despesa de Casa".
+  // Opcional — vazio/null remove o link (a pessoa pode não ter uma planilha compartilhada configurada ainda).
+  function definirLinkPlanilhaFamilia(estado, link) {
+    link = String(link || '').trim();
+    if (link && !/^https?:\/\//i.test(link)) throw erro('O link precisa começar com http:// ou https://.');
+    estado.linkPlanilhaFamilia = link;
   }
 
   // Limite mensal opcional por categoria (ideia do Mobills/Monarch: "até R$ X em Mercado por mês").
@@ -447,7 +456,7 @@
   }
 
   g.Motor = {
-    VERSAO, FREQUENCIAS, ROTULOS_CASA_PADRAO, categoriasPadrao, estadoNovo, definirNomePessoa, definirLimiteCategoria, definirRotulosCasa, importar, verificarSobreposicao, aplicarRegras,
+    VERSAO, FREQUENCIAS, ROTULOS_CASA_PADRAO, categoriasPadrao, estadoNovo, definirNomePessoa, definirLinkPlanilhaFamilia, definirLimiteCategoria, definirRotulosCasa, importar, verificarSobreposicao, aplicarRegras,
     classificar, classificarUm, classificarReceita, classificarReceitaUm, novidades, resumoMes, orcamentoMes, mesesComLancamentos, itensCasa,
     serializar, desserializar, lancarManual, pendentesManuais, confirmarConciliacao,
     rejeitarConciliacao, conciliacoesPendentesDetalhadas, exportarResumoCSV, exportarCasaCSV, marcarCasaEnviada

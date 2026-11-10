@@ -176,6 +176,11 @@ check('CSV do resumo lista o lançamento manual não conciliado (m2)', csvResumo
 // 13) Exportação CSV para a planilha da família ("Casa"): exige nome cadastrado antes.
 check('exportarCasaCSV exige nome cadastrado', (() => { try { M.exportarCasaCSV(e2, '2026-11'); return false; } catch (err) { return err.amigavel; } })());
 check('definirNomePessoa rejeita nome vazio', (() => { try { M.definirNomePessoa(e2, '   '); return false; } catch (err) { return err.amigavel; } })());
+M.definirLinkPlanilhaFamilia(e2, 'https://docs.google.com/spreadsheets/d/abc/edit');
+check('definirLinkPlanilhaFamilia aceita link válido', e2.linkPlanilhaFamilia === 'https://docs.google.com/spreadsheets/d/abc/edit');
+check('definirLinkPlanilhaFamilia rejeita link sem http(s)', (() => { try { M.definirLinkPlanilhaFamilia(e2, 'docs.google.com/x'); return false; } catch (err) { return err.amigavel; } })());
+M.definirLinkPlanilhaFamilia(e2, '');
+check('definirLinkPlanilhaFamilia aceita limpar o link', e2.linkPlanilhaFamilia === '');
 M.definirNomePessoa(e2, 'Ana');
 const casaNov = M.exportarCasaCSV(e2, '2026-11');
 check('CSV da Casa tem cabeçalho com as colunas da planilha da família', casaNov.texto.startsWith('Data;Descrição;Categoria;Tipo;Pago por;Origem;Valor;Observação;ID'));
