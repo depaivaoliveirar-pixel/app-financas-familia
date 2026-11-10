@@ -8,14 +8,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --verde:#0F5E57; --verde-escuro:#0B4741;
-    --azul:#1D4ED8; --laranja:#B45309; --laranja-escuro:#92400E;
-    --bg:#F4F6F5; --card:#FFFFFF; --borda:#DDE3E1; --borda2:#EEF1F0;
-    --texto:#1C2321; --texto2:#4A5653; --texto3:#5A6663; --texto4:#33403D;
-    --verde-ok:#15803D; --verde-okbg:#F0FDF4; --verde-oktexto:#166534;
-    --vermelho:#B91C1C; --vermelho-bg:#FEF2F2; --vermelho-texto:#991B1B;
-    --amarelo-bg:#FFF7ED; --amarelo-borda:#F3D9B5;
-    --cinza-borda:#B9C4C1; --cinza-bg:#E6EFEC; --cinza-bg2:#F9FAFA;
+    --verde:#22D3EE; --verde-escuro:#67E8F9;
+    --azul:#60A5FA; --laranja:#FB923C; --laranja-escuro:#FDBA74;
+    --bg:#070b14; --card:#101a28; --borda:#1e2f40; --borda2:#152230;
+    --texto:#E7F6FB; --texto2:#9FB7C4; --texto3:#7389A0; --texto4:#C7DCE6;
+    --verde-ok:#34D399; --verde-okbg:#0B2A20; --verde-oktexto:#6EE7B7;
+    --vermelho:#F87171; --vermelho-bg:#2A0E0E; --vermelho-texto:#FCA5A5;
+    --amarelo-bg:#2A1B0B; --amarelo-borda:#4A3418;
+    --cinza-borda:#2A3B4A; --cinza-bg:#121E2A; --cinza-bg2:#182533;
+    --glow:0 0 16px rgba(34,211,238,.25);
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:Inter,system-ui,sans-serif;color:var(--texto);background:var(--bg)}
@@ -23,15 +24,15 @@
   button{font-family:inherit;cursor:pointer}
   input,select,textarea{font-family:inherit}
   .oculto{display:none !important}
-  header.topo{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:16px 32px;background:var(--card);border-bottom:1px solid var(--borda)}
+  header.topo{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:16px 32px;background:var(--card);border-bottom:1px solid var(--borda);box-shadow:0 1px 0 rgba(34,211,238,.15)}
   .marca{display:flex;align-items:center;gap:12px}
-  .marca .logo{width:40px;height:40px;border-radius:10px;background:var(--verde);display:flex;align-items:center;justify-content:center;flex:none}
+  .marca .logo{width:40px;height:40px;border-radius:10px;background:var(--verde);display:flex;align-items:center;justify-content:center;flex:none;box-shadow:var(--glow)}
   .marca .nome{font-size:20px;font-weight:700}
   .marca .perfil{font-size:13px;color:var(--texto3)}
-  nav.menu{display:flex;flex-wrap:wrap;gap:6px}
+  nav.menu{display:flex;flex-wrap:wrap;gap:6px;flex-basis:100%}
   nav.menu button{padding:10px 16px;border-radius:999px;border:none;background:none;font-weight:600;font-size:14px;color:var(--texto);display:flex;align-items:center;gap:8px}
-  nav.menu button.ativo{background:var(--verde);color:#fff}
-  nav.menu button .conta{background:var(--laranja);color:#fff;border-radius:999px;padding:2px 8px;font-size:12px}
+  nav.menu button.ativo{background:var(--verde);color:var(--bg);box-shadow:var(--glow)}
+  nav.menu button .conta{background:var(--laranja);color:var(--bg);border-radius:999px;padding:2px 8px;font-size:12px}
   main.conteudo{max-width:1120px;margin:0 auto;padding:32px 24px}
   .card{background:var(--card);border:1px solid var(--borda);border-radius:16px;padding:24px}
   .grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
@@ -39,22 +40,48 @@
   .fonte-capa{font-family:'Fraunces',Georgia,serif}
   h2{margin:0 0 16px;font-size:18px}
   p.sub{margin:0 0 20px;font-size:16px;color:var(--texto2);line-height:1.5}
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:12px;border:1px solid var(--cinza-borda);background:#fff;font-size:15px;font-weight:600;color:var(--texto);text-decoration:none}
-  .btn-primario{border:none;background:var(--verde);color:#fff}
-  .btn-casa{border:none;background:var(--laranja);color:#fff}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:12px;border:1px solid var(--cinza-borda);background:var(--card);font-size:15px;font-weight:600;color:var(--texto);text-decoration:none}
+  .btn-primario{border:none;background:var(--verde);color:var(--bg);box-shadow:var(--glow)}
+  .btn-casa{border:none;background:var(--laranja);color:var(--bg);box-shadow:0 0 16px rgba(251,146,60,.25)}
   .btn-grande{min-height:52px;font-size:16px;padding:0 24px}
   .pill{padding:6px 14px;border-radius:999px;background:var(--cinza-bg);font-size:14px;font-weight:600}
   label.campo{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--texto3)}
-  input[type=text],input[type=number],input[type=password],input[type=date],select,textarea{min-height:48px;border-radius:10px;border:1px solid var(--cinza-borda);padding:0 12px;font-size:16px;color:var(--texto);background:#fff}
+  input[type=text],input[type=number],input[type=password],input[type=date],select,textarea{min-height:48px;border-radius:10px;border:1px solid var(--cinza-borda);padding:0 12px;font-size:16px;color:var(--texto);background:var(--card)}
+  input::placeholder,textarea::placeholder{color:var(--texto3)}
   textarea{min-height:90px;padding:10px 12px}
   table{width:100%;border-collapse:collapse;font-size:15px}
   th{text-align:left;padding:10px 8px;border-bottom:1px solid var(--borda);color:var(--texto2);font-size:13px}
   td{padding:10px 8px;border-bottom:1px solid var(--borda2)}
-  .toast{position:fixed;bottom:20px;right:20px;max-width:360px;background:var(--texto);color:#fff;padding:14px 18px;border-radius:12px;font-size:15px;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:50}
-  .toast.erro{background:var(--vermelho-texto)}
+  .toast{position:fixed;bottom:20px;right:20px;max-width:360px;background:var(--card);color:var(--texto);padding:14px 18px;border-radius:12px;font-size:15px;border:1px solid var(--borda);box-shadow:0 8px 24px rgba(0,0,0,.6),var(--glow);z-index:50}
+  .toast.erro{border-color:var(--vermelho);color:var(--vermelho-texto)}
   .barra{height:28px;border-radius:8px;overflow:hidden;display:flex}
-  .zona-arrastar{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:48px 24px;border:3px dashed var(--verde);border-radius:20px;background:#fff;text-align:center;cursor:pointer}
+  .zona-arrastar{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:48px 24px;border:3px dashed var(--verde);border-radius:20px;background:var(--card);text-align:center;cursor:pointer}
   .zona-arrastar.sobre{background:var(--cinza-bg)}
+  .hud-icone{position:relative;width:96px;height:96px;display:flex;align-items:center;justify-content:center}
+  .hud-icone .hud-radar{position:absolute;inset:0;width:100%;height:100%}
+  .hud-icone .icone-upload{position:relative;z-index:1}
+  .hud-ring{fill:none;stroke:var(--verde);stroke-width:1}
+  .hud-ring-1{opacity:.3}
+  .hud-ring-2{opacity:.18;stroke-dasharray:3 7}
+  .hud-ticks{transform-origin:50px 50px;animation:hud-spin 16s linear infinite}
+  .hud-ticks line{stroke:var(--verde);stroke-width:1.5;opacity:.4}
+  .hud-sweep{transform-origin:50px 50px;animation:hud-spin 3s linear infinite}
+  .hud-sweep line{stroke:var(--verde);stroke-width:2;opacity:.85;filter:drop-shadow(0 0 4px var(--verde))}
+  .hud-core{fill:var(--verde);filter:drop-shadow(0 0 6px var(--verde));animation:hud-pulse 2.2s ease-in-out infinite}
+  @keyframes hud-spin{to{transform:rotate(360deg)}}
+  @keyframes hud-pulse{0%,100%{opacity:.55;r:3.5}50%{opacity:1;r:5.5}}
+  @media (prefers-reduced-motion:reduce){.hud-ticks,.hud-sweep,.hud-core{animation:none}}
+  .robo-flutuante{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:var(--card);border:1px solid var(--borda);display:flex;align-items:center;justify-content:center;z-index:60;animation:robo-pulso 2.6s ease-in-out infinite}
+  .robo-flutuante:hover{background:var(--cinza-bg)}
+  @keyframes robo-pulso{0%,100%{box-shadow:0 0 10px rgba(34,211,238,.3)}50%{box-shadow:0 0 20px rgba(34,211,238,.55)}}
+  @media (prefers-reduced-motion:reduce){.robo-flutuante{animation:none}}
+  .robo-menu{position:fixed;bottom:90px;right:24px;background:var(--card);border:1px solid var(--borda);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.6);z-index:60;min-width:240px}
+  .robo-menu .btn{justify-content:flex-start;width:100%}
+  .card-hud{position:relative}
+  .card-hud::before,.card-hud::after{content:'';position:absolute;width:14px;height:14px;border:2px solid var(--verde);opacity:.6;pointer-events:none}
+  .card-hud::before{top:8px;left:8px;border-right:none;border-bottom:none}
+  .card-hud::after{bottom:8px;right:8px;border-left:none;border-top:none}
+  .mini-resumo{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -238,28 +265,90 @@ let viewAtual = 'inicio';
 
 function irPara(v) { viewAtual = v; renderizar(); }
 
+function miniGauge(percentual, cor) {
+  const p = Math.max(0, Math.min(100, percentual));
+  const r = 13, c = 2 * Math.PI * r;
+  const offset = c - (p / 100) * c;
+  return `<svg width="34" height="34" viewBox="0 0 34 34" style="flex:none">
+    <circle cx="17" cy="17" r="${r}" fill="none" stroke="var(--borda2)" stroke-width="3.5"/>
+    <circle cx="17" cy="17" r="${r}" fill="none" stroke="${cor}" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${offset}" transform="rotate(-90 17 17)" style="filter:drop-shadow(0 0 3px ${cor})"/>
+  </svg>`;
+}
+
+function gaugeSVG(percentual, cor) {
+  const p = Math.max(0, Math.min(100, percentual));
+  const r = 20, c = 2 * Math.PI * r;
+  const offset = c - (p / 100) * c;
+  return `<svg width="56" height="56" viewBox="0 0 56 56" style="flex:none">
+    <circle cx="28" cy="28" r="${r}" fill="none" stroke="var(--borda2)" stroke-width="5"/>
+    <circle cx="28" cy="28" r="${r}" fill="none" stroke="${cor}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${offset}" transform="rotate(-90 28 28)" style="filter:drop-shadow(0 0 4px ${cor});transition:stroke-dashoffset .4s"/>
+    <text x="28" y="32" text-anchor="middle" font-size="12" font-weight="700" fill="var(--texto)">${Math.round(p)}%</text>
+  </svg>`;
+}
+
+const ROBO_ICONE = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--verde)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <rect x="5" y="8" width="14" height="11" rx="3"/>
+  <circle cx="9.5" cy="13.5" r="1.1" fill="var(--verde)" stroke="none"/>
+  <circle cx="14.5" cy="13.5" r="1.1" fill="var(--verde)" stroke="none"/>
+  <path d="M12 8V5"/><circle cx="12" cy="3.5" r="1.3"/>
+  <path d="M3 12H1.5"/><path d="M22.5 12H21"/>
+</svg>`;
+
 function layout(conteudoHtml) {
   const perfilLabel = estado ? (estado.nomePessoa || 'Minha conta') : '';
   const qtdNovidades = estado ? M.novidades(estado).length : 0;
   const abas = [
     ['inicio', 'Início'], ['classificar', 'Classificar'], ['resumo', 'Resumo'],
-    ['lancarManual', 'Lançar manualmente'], ['ajustes', 'Ajustes'], ['sobre', 'Sobre'], ['ajuda', 'Ajuda']
+    ['lancarManual', 'Lançar manualmente'], ['ajustes', 'Ajustes'], ['sobre', 'Sobre']
   ];
   const nav = abas.map(([k, label]) => {
     const badge = k === 'classificar' && qtdNovidades > 0 ? `<span class="conta">${qtdNovidades}</span>` : '';
     return `<button data-ir="${k}" class="${viewAtual === k ? 'ativo' : ''}">${label}${badge}</button>`;
   }).join('');
+  let miniResumo = '';
+  if (estado) {
+    const meses = M.mesesComLancamentos(estado);
+    const mr = mesAtual && meses.includes(mesAtual) ? mesAtual : meses[0];
+    if (mr) {
+      const r = M.resumoMes(estado, mr);
+      const pctDespesa = r.entrou > 0 ? Math.min(100, r.saiu / r.entrou * 100) : (r.saiu > 0 ? 100 : 0);
+      const pctSaldo = r.entrou > 0 ? Math.max(0, Math.min(100, r.sobrou / r.entrou * 100)) : 0;
+      const item = (pct, cor, label, valor) => `
+        <div style="display:flex;align-items:center;gap:6px" title="${label}: ${moeda(valor)}">
+          ${miniGauge(pct, cor)}
+          <div style="display:flex;flex-direction:column;line-height:1.15">
+            <span style="font-size:10px;color:var(--texto3)">${label}</span>
+            <span style="font-size:13px;font-weight:700;color:var(--texto)">${moeda(valor)}</span>
+          </div>
+        </div>`;
+      miniResumo = `<div class="mini-resumo" aria-label="Resumo de ${mesFmt(mr)}">
+        ${item(100, 'var(--verde-ok)', 'Receita', r.entrou)}
+        ${item(pctDespesa, 'var(--vermelho)', 'Despesa', r.saiu)}
+        ${item(pctSaldo, r.sobrou >= 0 ? 'var(--azul)' : 'var(--vermelho)', 'Saldo', r.sobrou)}
+      </div>`;
+    }
+  }
   document.getElementById('app').innerHTML = `
     <header class="topo">
       <div class="marca">
-        <div class="logo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-6 9 6"/><path d="M5 10v9h14v-9"/><path d="M10 19v-5h4v5"/></svg></div>
+        <div class="logo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-6 9 6"/><path d="M5 10v9h14v-9"/><path d="M10 19v-5h4v5"/></svg></div>
         <div><div class="nome">Finanças da Família</div><div class="perfil">${perfilLabel ? 'Perfil: ' + perfilLabel : ''}</div></div>
       </div>
+      ${miniResumo}
       <nav class="menu" aria-label="Menu principal">${nav}</nav>
     </header>
     <main class="conteudo">${conteudoHtml}</main>
+    <button type="button" id="roboBtn" class="robo-flutuante" aria-label="Ajuda e contato">${ROBO_ICONE}</button>
+    <div id="roboMenu" class="robo-menu oculto">
+      <button type="button" class="btn" data-ir="ajuda">Ajuda</button>
+      <button type="button" class="btn" id="roboWhats">Falar com Ricardo no WhatsApp</button>
+    </div>
   `;
   document.querySelectorAll('[data-ir]').forEach(b => b.onclick = () => irPara(b.dataset.ir));
+  document.getElementById('roboBtn').onclick = () => document.getElementById('roboMenu').classList.toggle('oculto');
+  document.getElementById('roboWhats').onclick = () => {
+    window.open('https://wa.me/5527992315738?text=' + encodeURIComponent('Oi, Ricardo! Preciso de uma ajuda com o app Finanças da Família.'), '_blank', 'noopener');
+  };
 }
 
 function renderizar() {
@@ -349,7 +438,16 @@ VIEWS.inicio = function () {
         <h1 style="font-size:30px">Traga os extratos do mês</h1>
         <p class="sub">Arraste os arquivos que você baixou do banco. O app descobre sozinho de qual banco é cada um.</p>
         <label class="zona-arrastar" id="zonaArrastar">
-          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#0F5E57" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+          <div class="hud-icone">
+            <svg class="hud-radar" viewBox="0 0 100 100" aria-hidden="true">
+              <circle class="hud-ring hud-ring-1" cx="50" cy="50" r="46"/>
+              <circle class="hud-ring hud-ring-2" cx="50" cy="50" r="34"/>
+              <g class="hud-ticks">${Array.from({ length: 16 }).map((_, i) => `<line x1="50" y1="4" x2="50" y2="10" transform="rotate(${i * 22.5} 50 50)"/>`).join('')}</g>
+              <g class="hud-sweep"><line x1="50" y1="50" x2="50" y2="6"/></g>
+              <circle class="hud-core" cx="50" cy="50" r="4"/>
+            </svg>
+            <svg class="icone-upload" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--verde)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+          </div>
           <span style="font-size:22px;font-weight:700">Arraste aqui seus extratos e faturas</span>
           <span style="font-size:16px;color:var(--texto2)">ou clique para escolher os arquivos no computador</span>
           <input type="file" multiple id="inputArquivos" style="font-size:15px">
@@ -510,17 +608,17 @@ VIEWS.classificar = function () {
   });
 };
 function renderGrupoClassificar(g, i) {
-  const corCasa = g.ehReceita ? '#15803D' : '#B45309'; // receita Casa = "pote comum" (verde), despesa Casa = laranja
+  const corCasa = g.ehReceita ? 'var(--verde-ok)' : 'var(--laranja)'; // receita Casa = "pote comum" (verde), despesa Casa = laranja
   return `
-    <article class="card" style="display:flex;flex-wrap:wrap;align-items:center;gap:20px;margin-bottom:12px${g.ehReceita ? ';border-left:4px solid #15803D' : ''}">
+    <article class="card" style="display:flex;flex-wrap:wrap;align-items:center;gap:20px;margin-bottom:12px${g.ehReceita ? ';border-left:4px solid var(--verde-ok)' : ''}">
       <div style="flex:1 1 260px;min-width:0">
         ${g.ehReceita ? '<span class="pill" style="background:var(--verde-okbg);color:var(--verde-oktexto);margin-bottom:6px;display:inline-block">Entrada de dinheiro</span><br>' : ''}
         <div style="font-size:19px;font-weight:700">${g.chave}</div>
         <div style="font-size:14px;color:var(--texto3);margin-top:4px">${g.quantidade} lançamento${g.quantidade > 1 ? 's' : ''} · ${moeda(g.total)} · ${g.origens.join(', ')}</div>
       </div>
       <div role="group" aria-label="Pessoal ou Casa" style="display:flex;gap:8px">
-        <button type="button" data-grupo="${i}" data-tipo="Pessoal" style="min-height:48px;padding:0 22px;border-radius:12px;border:2px solid #1D4ED8;background:#fff;color:#1D4ED8;font-weight:600">Pessoal</button>
-        <button type="button" data-grupo="${i}" data-tipo="Casa" style="min-height:48px;padding:0 22px;border-radius:12px;border:2px solid ${corCasa};background:#fff;color:${corCasa};font-weight:600">${g.ehReceita ? 'Casa (pote comum)' : 'Casa'}</button>
+        <button type="button" data-grupo="${i}" data-tipo="Pessoal" style="min-height:48px;padding:0 22px;border-radius:12px;border:2px solid var(--azul);background:var(--card);color:var(--azul);font-weight:600">Pessoal</button>
+        <button type="button" data-grupo="${i}" data-tipo="Casa" style="min-height:48px;padding:0 22px;border-radius:12px;border:2px solid ${corCasa};background:var(--card);color:${corCasa};font-weight:600">${g.ehReceita ? 'Casa (pote comum)' : 'Casa'}</button>
       </div>
       ${g.ehReceita ? '' : `
       <label class="campo">Categoria
@@ -536,8 +634,8 @@ function atualizarEstiloTipo(i) {
   document.querySelectorAll(`[data-grupo="${i}"]`).forEach(b => {
     const ativo = b.classList.contains('tipo-ativo');
     const cor = b.style.borderColor; // já vem certo do render (laranja = despesa Casa, verde = receita Casa, azul = Pessoal)
-    b.style.background = ativo ? cor : '#fff';
-    b.style.color = ativo ? '#fff' : cor;
+    b.style.background = ativo ? cor : 'var(--card)';
+    b.style.color = ativo ? 'var(--bg)' : cor;
   });
 }
 
@@ -564,21 +662,21 @@ VIEWS.resumo = function () {
         </div>
       </div>
       <div class="grade">
-        <div class="card"><div style="font-size:14px;color:var(--texto2)">Receita</div><div style="font-size:28px;font-weight:700;color:var(--verde-ok);margin-top:6px">${moeda(r.entrou)}</div></div>
-        <div class="card"><div style="font-size:14px;color:var(--texto2)">Despesa</div><div style="font-size:28px;font-weight:700;color:var(--vermelho);margin-top:6px">${moeda(r.saiu)}</div></div>
-        <div class="card"><div style="font-size:14px;color:var(--texto2)">Saldo</div><div style="font-size:28px;font-weight:700;margin-top:6px;color:${r.sobrou >= 0 ? '#1D4ED8' : 'var(--vermelho)'}">${moeda(r.sobrou)}</div></div>
+        <div class="card card-hud"><div style="font-size:14px;color:var(--texto2)">Receita</div><div style="font-size:28px;font-weight:700;color:var(--verde-ok);margin-top:6px">${moeda(r.entrou)}</div></div>
+        <div class="card card-hud"><div style="font-size:14px;color:var(--texto2)">Despesa</div><div style="font-size:28px;font-weight:700;color:var(--vermelho);margin-top:6px">${moeda(r.saiu)}</div></div>
+        <div class="card card-hud"><div style="font-size:14px;color:var(--texto2)">Saldo</div><div style="font-size:28px;font-weight:700;margin-top:6px;color:${r.sobrou >= 0 ? 'var(--azul)' : 'var(--vermelho)'}">${moeda(r.sobrou)}</div></div>
       </div>
       <div class="grade" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr))">
         <section class="card">
           <h2>Pessoal × Despesa de Casa</h2>
           <div class="barra" role="img" aria-label="Pessoal e Despesa de Casa">
-            <div style="width:${pct(r.pessoalXcasa.Pessoal, r.saiu)}%;background:#1D4ED8"></div>
-            <div style="width:${pct(r.pessoalXcasa.Casa, r.saiu)}%;background:#B45309"></div>
-            <div style="width:${pct(r.pessoalXcasa['Sem classificar'], r.saiu)}%;background:#B9C4C1"></div>
+            <div style="width:${pct(r.pessoalXcasa.Pessoal, r.saiu)}%;background:var(--azul)"></div>
+            <div style="width:${pct(r.pessoalXcasa.Casa, r.saiu)}%;background:var(--laranja)"></div>
+            <div style="width:${pct(r.pessoalXcasa['Sem classificar'], r.saiu)}%;background:var(--cinza-borda)"></div>
           </div>
           <div style="display:flex;justify-content:space-between;gap:12px;margin-top:14px;font-size:15px;flex-wrap:wrap">
-            <span><strong style="color:#1D4ED8">Pessoal</strong> ${moeda(r.pessoalXcasa.Pessoal || 0)}</span>
-            <span><strong style="color:#92400E">Despesa de Casa</strong> ${moeda(r.pessoalXcasa.Casa || 0)}</span>
+            <span><strong style="color:var(--azul)">Pessoal</strong> ${moeda(r.pessoalXcasa.Pessoal || 0)}</span>
+            <span><strong style="color:var(--laranja-escuro)">Despesa de Casa</strong> ${moeda(r.pessoalXcasa.Casa || 0)}</span>
             ${r.pessoalXcasa['Sem classificar'] ? `<span><strong>Sem classificar</strong> ${moeda(r.pessoalXcasa['Sem classificar'])}</span>` : ''}
           </div>
         </section>
@@ -588,7 +686,7 @@ VIEWS.resumo = function () {
             ${Object.entries(r.porCategoria).sort((a, b) => b[1] - a[1]).map(([cat, v]) => `
               <div style="display:grid;grid-template-columns:130px 1fr 90px;align-items:center;gap:10px">
                 <span>${cat}${cat === 'Tarifas e juros' ? ' ⚠️' : ''}</span>
-                <div style="height:12px;border-radius:6px;background:${cat === 'Tarifas e juros' ? '#B91C1C' : '#0F5E57'};width:${Math.round(v / totalCategoria * 100)}%"></div>
+                <div style="height:12px;border-radius:6px;background:${cat === 'Tarifas e juros' ? 'var(--vermelho)' : 'var(--verde)'};width:${Math.round(v / totalCategoria * 100)}%"></div>
                 <span style="text-align:right">${moeda(v)}</span>
               </div>`).join('') || '<p style="margin:0;color:var(--texto2)">Sem gastos no mês.</p>'}
           </div>
@@ -597,12 +695,14 @@ VIEWS.resumo = function () {
           <h2>Ritmo do mês (${orcamento.percentualMesPassado}% do mês já passou)</h2>
           <div style="display:flex;flex-direction:column;gap:12px">
             ${orcamento.categorias.map(c => {
-              const cor = c.ritmo === 'estourou' ? '#B91C1C' : (c.ritmo === 'atencao' ? '#B45309' : '#15803D');
+              const cor = c.ritmo === 'estourou' ? 'var(--vermelho)' : (c.ritmo === 'atencao' ? 'var(--laranja)' : 'var(--verde-ok)');
               const texto = c.ritmo === 'estourou' ? 'estourou o limite' : (c.ritmo === 'atencao' ? 'gastando rápido' : 'dentro do esperado');
-              return `<div>
-                <div style="display:flex;justify-content:space-between;font-size:14px"><strong>${c.categoria}</strong><span style="color:${cor};font-weight:600">${texto}</span></div>
-                <div style="height:10px;border-radius:6px;background:var(--borda2);margin-top:6px;overflow:hidden"><div style="height:100%;width:${Math.min(100, c.percentualGasto)}%;background:${cor}"></div></div>
-                <div style="font-size:13px;color:var(--texto3);margin-top:4px">${moeda(c.gasto)} de ${moeda(c.limite)} (${c.percentualGasto}%)</div>
+              return `<div style="display:flex;align-items:center;gap:14px">
+                ${gaugeSVG(c.percentualGasto, cor)}
+                <div style="flex:1;min-width:0">
+                  <div style="display:flex;justify-content:space-between;font-size:14px"><strong>${c.categoria}</strong><span style="color:${cor};font-weight:600">${texto}</span></div>
+                  <div style="font-size:13px;color:var(--texto3);margin-top:4px">${moeda(c.gasto)} de ${moeda(c.limite)} (${c.percentualGasto}%)</div>
+                </div>
               </div>`;
             }).join('')}
           </div>
@@ -612,14 +712,14 @@ VIEWS.resumo = function () {
         <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px">
           <h2 style="margin:0">Lançamentos</h2>
           <div role="group" aria-label="Filtro" style="display:flex;gap:8px">
-            ${['Todos', 'Pessoal', 'Casa'].map(f => `<button type="button" data-filtro="${f}" class="btn" style="min-height:40px;border-radius:999px;${filtroLancamentos === f ? 'background:#1C2321;color:#fff;border:none' : ''}">${f}</button>`).join('')}
+            ${['Todos', 'Pessoal', 'Casa'].map(f => `<button type="button" data-filtro="${f}" class="btn" style="min-height:40px;border-radius:999px;${filtroLancamentos === f ? 'background:var(--verde);color:var(--bg);border:none' : ''}">${f}</button>`).join('')}
           </div>
         </div>
         <div style="overflow-x:auto">
           <table style="min-width:640px">
             <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th style="text-align:right">Valor</th></tr></thead>
             <tbody>
-              ${lista.map(t => `<tr><td>${dataFmt(t.data)}</td><td>${t.descricao}</td><td>${t.categoria || '—'}</td><td style="color:${t.tipo === 'Casa' ? '#92400E' : '#1D4ED8'};font-weight:600">${t.tipo || 'Sem classificar'}</td><td style="text-align:right">${moeda(t.valor)}</td></tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--texto2)">Nada aqui.</td></tr>'}
+              ${lista.map(t => `<tr><td>${dataFmt(t.data)}</td><td>${t.descricao}</td><td>${t.categoria || '—'}</td><td style="color:${t.tipo === 'Casa' ? 'var(--laranja-escuro)' : 'var(--azul)'};font-weight:600">${t.tipo || 'Sem classificar'}</td><td style="text-align:right">${moeda(t.valor)}</td></tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--texto2)">Nada aqui.</td></tr>'}
             </tbody>
           </table>
         </div>
@@ -684,11 +784,11 @@ VIEWS.enviarCasa = function () {
       <button class="btn" data-ir="resumo">‹ Voltar ao resumo</button>
       <h1>Enviar Despesa de Casa para a planilha da família — ${mesFmt(mesAtual)}</h1>
       <section class="card">
-        <p class="sub">Só vão os gastos marcados como <strong style="color:#92400E">Casa</strong>. Os gastos pessoais continuam só neste computador.</p>
+        <p class="sub">Só vão os gastos marcados como <strong style="color:var(--laranja-escuro)">Casa</strong>. Os gastos pessoais continuam só neste computador.</p>
         <div class="grade">
           <div style="background:var(--amarelo-bg);border-radius:12px;padding:16px"><div style="font-size:13px;color:var(--texto2)">Lançamentos de Despesa de Casa</div><div style="font-size:24px;font-weight:700">${itens.length}</div></div>
           <div style="background:var(--amarelo-bg);border-radius:12px;padding:16px"><div style="font-size:13px;color:var(--texto2)">Total de Despesa de Casa</div><div style="font-size:24px;font-weight:700">${moeda(total)}</div></div>
-          <div style="background:var(--bg);border-radius:12px;padding:16px"><div style="font-size:13px;color:var(--texto2)">Já enviados antes</div><div style="font-size:24px;font-weight:700">${jaEnviados}</div></div>
+          <div style="background:var(--cinza-bg2);border-radius:12px;padding:16px"><div style="font-size:13px;color:var(--texto2)">Já enviados antes</div><div style="font-size:24px;font-weight:700">${jaEnviados}</div></div>
         </div>
       </section>
       ${estado.linkPlanilhaFamilia ? `<section class="card" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
@@ -750,8 +850,8 @@ VIEWS.lancarManual = function () {
           </label>
         </div>
         <div role="group" aria-label="Pessoal ou Casa" style="display:flex;gap:8px">
-          <button type="button" id="lmTipoPessoal" data-tipo="Pessoal" style="min-height:48px;padding:0 22px;border-radius:12px;border:2px solid #1D4ED8;background:#fff;color:#1D4ED8;font-weight:600">Pessoal</button>
-          <button type="button" id="lmTipoCasa" data-tipo="Casa" style="min-height:48px;padding:0 22px;border-radius:12px;border:2px solid #B45309;background:#fff;color:#B45309;font-weight:600">Casa</button>
+          <button type="button" id="lmTipoPessoal" data-tipo="Pessoal" style="min-height:48px;padding:0 22px;border-radius:12px;border:2px solid var(--azul);background:var(--card);color:var(--azul);font-weight:600">Pessoal</button>
+          <button type="button" id="lmTipoCasa" data-tipo="Casa" style="min-height:48px;padding:0 22px;border-radius:12px;border:2px solid var(--laranja);background:var(--card);color:var(--laranja);font-weight:600">Casa</button>
         </div>
         <div class="grade" style="grid-template-columns:1fr 1fr">
           <label class="campo">Categoria
@@ -785,8 +885,8 @@ VIEWS.lancarManual = function () {
   const btnPessoal = document.getElementById('lmTipoPessoal'), btnCasa = document.getElementById('lmTipoCasa');
   const marcarTipo = t => {
     tipoEscolhido = t;
-    btnPessoal.style.background = t === 'Pessoal' ? '#1D4ED8' : '#fff'; btnPessoal.style.color = t === 'Pessoal' ? '#fff' : '#1D4ED8';
-    btnCasa.style.background = t === 'Casa' ? '#B45309' : '#fff'; btnCasa.style.color = t === 'Casa' ? '#fff' : '#B45309';
+    btnPessoal.style.background = t === 'Pessoal' ? 'var(--azul)' : 'var(--card)'; btnPessoal.style.color = t === 'Pessoal' ? 'var(--bg)' : 'var(--azul)';
+    btnCasa.style.background = t === 'Casa' ? 'var(--laranja)' : 'var(--card)'; btnCasa.style.color = t === 'Casa' ? 'var(--bg)' : 'var(--laranja)';
     document.getElementById('lmFreqWrap').classList.toggle('oculto', t !== 'Casa');
   };
   btnPessoal.onclick = () => marcarTipo('Pessoal');
@@ -892,18 +992,18 @@ VIEWS.ajustes = function () {
 /* ---------- Capa (1ª tela, antes de configurar) ---------- */
 const ICONE_CASA_MOEDAS = `
   <svg width="100" height="86" viewBox="0 0 140 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <path d="M40 60 L70 34 L100 60" stroke="#0F5E57" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M46 56 V92 a3 3 0 0 0 3 3 H91 a3 3 0 0 0 3-3 V56" stroke="#0F5E57" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-    <rect x="62" y="70" width="16" height="25" rx="2" stroke="#0F5E57" stroke-width="4"/>
-    <circle cx="20" cy="98" r="15" fill="#FFF7ED" stroke="#B45309" stroke-width="4"/>
-    <circle cx="20" cy="98" r="6.5" stroke="#B45309" stroke-width="2.5"/>
-    <circle cx="120" cy="98" r="15" fill="#EFF4FF" stroke="#1D4ED8" stroke-width="4"/>
-    <circle cx="120" cy="98" r="6.5" stroke="#1D4ED8" stroke-width="2.5"/>
+    <path d="M40 60 L70 34 L100 60" stroke="var(--verde)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M46 56 V92 a3 3 0 0 0 3 3 H91 a3 3 0 0 0 3-3 V56" stroke="var(--verde)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="62" y="70" width="16" height="25" rx="2" stroke="var(--verde)" stroke-width="4"/>
+    <circle cx="20" cy="98" r="15" fill="rgba(251,146,60,.12)" stroke="var(--laranja)" stroke-width="4"/>
+    <circle cx="20" cy="98" r="6.5" stroke="var(--laranja)" stroke-width="2.5"/>
+    <circle cx="120" cy="98" r="15" fill="rgba(96,165,250,.12)" stroke="var(--azul)" stroke-width="4"/>
+    <circle cx="120" cy="98" r="6.5" stroke="var(--azul)" stroke-width="2.5"/>
   </svg>`;
 
 VIEWS.capa = function () {
   document.getElementById('app').innerHTML = `
-    <main style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#F4F6F5,#E6EFEC);padding:24px">
+    <main style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 35%,#0e1a28,#070b14 70%);padding:24px">
       <div style="max-width:460px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:22px">
         ${ICONE_CASA_MOEDAS}
         <h1 class="fonte-capa" style="font-size:42px;font-weight:600;margin:0;color:var(--texto);line-height:1.15">Finanças da Família</h1>
@@ -922,8 +1022,8 @@ VIEWS.resumoApp = function () {
       <div style="max-width:560px;display:flex;flex-direction:column;gap:22px;text-align:center;align-items:center">
         <h1 class="fonte-capa" style="font-size:30px;margin:0;font-weight:600">Do que se trata</h1>
         <p style="margin:0;font-size:17px;color:var(--texto4);line-height:1.6">
-          Você arrasta os extratos do banco, diz uma vez se cada gasto é <strong style="color:#1D4ED8">Pessoal</strong>
-          ou de <strong style="color:#92400E">Casa</strong>, e vê o resumo do mês. Tudo roda só no seu computador —
+          Você arrasta os extratos do banco, diz uma vez se cada gasto é <strong style="color:var(--azul)">Pessoal</strong>
+          ou de <strong style="color:var(--laranja-escuro)">Casa</strong>, e vê o resumo do mês. Tudo roda só no seu computador —
           sem internet, sem IA. Se quiser, dá pra juntar as despesas de Casa com quem mora com você numa planilha
           compartilhada.
         </p>
@@ -947,7 +1047,7 @@ VIEWS.sobre = function () {
         <h2>O que é este app</h2>
         <p style="margin:0;font-size:15px;color:var(--texto4);line-height:1.6">
           Um jeito simples de organizar os extratos e faturas do mês. Você arrasta os arquivos que baixou do banco,
-          diz uma vez se cada gasto é <strong style="color:#1D4ED8">Pessoal</strong> ou de <strong style="color:#92400E">Casa</strong>
+          diz uma vez se cada gasto é <strong style="color:var(--azul)">Pessoal</strong> ou de <strong style="color:var(--laranja-escuro)">Casa</strong>
           (nas próximas vezes o app lembra sozinho), e vê o resumo do mês: quanto entrou, quanto saiu, quanto sobrou.
         </p>
         <p style="margin:16px 0 0;font-size:15px;color:var(--texto4);line-height:1.6">
@@ -999,13 +1099,13 @@ VIEWS.ajuda = function () {
       </section>
       <section class="card">
         <h2>Se você divide despesas com alguém (planilha compartilhada)</h2>
-        <p class="sub" style="margin-bottom:12px">Pra juntar os gastos de <strong style="color:#92400E">Casa</strong> numa planilha com quem mora com você, os dois precisam configurar — mas <strong>só um de vocês administra a planilha</strong> (cria ela e instala o script). Quem mora com essa pessoa não cria nada nem instala nada: só entra na mesma pasta do Drive e usa o mesmo link de planilha que já existe. Se qualquer um desses passos faltar, o arquivo pode ser gerado certinho e mesmo assim não aparecer na planilha.</p>
+        <p class="sub" style="margin-bottom:12px">Pra juntar os gastos de <strong style="color:var(--laranja-escuro)">Casa</strong> numa planilha com quem mora com você, os dois precisam configurar — mas <strong>só um de vocês administra a planilha</strong> (faz a cópia do modelo). Quem mora com essa pessoa não cria nada: só entra na mesma pasta do Drive e usa o mesmo link de planilha que já existe. Se qualquer um desses passos faltar, o arquivo pode ser gerado certinho e mesmo assim não aparecer na planilha.</p>
         <ol style="margin:0;padding-left:22px;font-size:15px;color:var(--texto4);line-height:1.8">
           <li>Combinem: os dois vão usar o app, e os dois vão marcar "Casa" os mesmos tipos de gasto.</li>
           <li>Instalem o Google Drive para computador (drive.google.com) e entrem na mesma pasta compartilhada (ex.: "Extratos e faturas - conta conjunta").</li>
           <li>Cada um, em <strong>Ajustes</strong>, escolhe essa pasta sincronizada como "pasta compartilhada" — assim o arquivo vai direto pra lá, sem precisar mover na mão.</li>
-          <li>Cada um cadastra o link da planilha da família em <strong>Ajustes</strong>, pra poder abri-la direto do app.</li>
-          <li>Quem administra a planilha instala o script uma vez (arquivo <code>codigo/appsScriptCasa.gs</code> do projeto — peça ajuda a quem configurou o app pra você).</li>
+          <li>Quem administra a planilha faz uma cópia do modelo (já vem com tudo pronto, sem precisar instalar nada): Arquivo &gt; Fazer uma cópia.</li>
+          <li>Cada um cadastra o link dessa cópia em <strong>Ajustes</strong>, pra poder abri-la direto do app.</li>
           <li>Pronto: depois de classificar "Casa" e clicar em "Enviar Despesa de Casa" no Resumo, quem administra a planilha abre ela e usa o menu "Finanças da Família > Importar gastos da Casa".</li>
         </ol>
       </section>
@@ -1033,7 +1133,7 @@ VIEWS.ajuda = function () {
     window.open('https://wa.me/5527992315738?text=' + encodeURIComponent(msg), '_blank', 'noopener');
   };
   document.getElementById('btnConvite').onclick = () => {
-    const msg = 'Oi! Estou usando um app simples (Finanças da Família) pra organizar os gastos de casa, sem precisar de internet. Queria juntar os gastos da Casa com você numa planilha compartilhada — topa usar também? Te mando o app e o passo a passo de como configurar.';
+    const msg = 'Oi! Fiz um app bem simples pra organizarmos os gastos de casa juntos. São só uns cliques:\n\n1. Abra este link no computador (não funciona no celular): https://depaivaoliveirar-pixel.github.io/app-financas-familia/\n2. Clique no botão "Próximo".\n3. Clique no botão "Começar".\n4. Digite seu nome e clique em "Continuar".\n5. Vai abrir uma janela pedindo uma pasta — escolha uma pasta sua (ou crie uma nova) e clique em "Selecionar pasta".\n\nPronto, já pode usar! Depois eu te ajudo a juntar as contas de "Casa" numa planilha, se quiser — é mais fácil eu te mostrar do que explicar por aqui.';
     window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank', 'noopener');
   };
 };
