@@ -2,6 +2,13 @@ node_modules/
 amostras/
 *.log
 
+# Atalhos locais do Google Drive (não são conteúdo real, só ponteiros pra arquivos na nuvem)
+*.gsheet
+*.gdoc
+*.gslides
+*.gdraw
+*.gform
+
 # Contexto de trabalho com dados pessoais/financeiros reais — nunca publicar
 CLAUDE.md
 replica/
